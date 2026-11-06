@@ -112,7 +112,7 @@ class MySource:
 
 Then import the new module at the bottom of `signals/collectors/__init__.py`.
 
-Collector ids are part of every record id. Do not rename one after data exists.
+Collector ids are part of every record id. Do not rename one after data exists. The same holds for how a collector builds `source_id`. If you change it, delete `data/<tech>/updates.jsonl` so the next run rebuilds the store. Otherwise old and new records both stay.
 
 ## GitHub Pages
 
