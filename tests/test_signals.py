@@ -73,7 +73,9 @@ def test_status_rules(title, status):
     ("DeepSeek V4.1 Flash is scheduled for retirement", "deprecation"),
     ("Upcoming end of life for the Genie One MCP Beta endpoint", "deprecation"),
     ("Thinking Machine Labs Inkling is retired", "retirement"),
-    ("Azure Databricks plans to support Tableau as a source", "coming-soon"),
+    ("Azure Databricks plans to support Tableau as a source", "release"),  # no explicit label
+    ("File upload will soon be available by default", "coming-soon"),
+    ("Upcoming removal of AI Functions support on older runtimes", "deprecation"),
     ("Okta connector is available in Beta", "release"),
 ])
 def test_kind_rules(title, kind):
@@ -102,6 +104,7 @@ def run_pipeline(tmp: Path, out: Path):
     data = tmp / "data"
     args = ["--data", str(data), "all", "--input", f"databricks-rss={FIXTURE}",
             "--input", f"snowflake-release-notes={ROOT / 'tests' / 'fixtures' / 'snowflake-all-release-notes.html'}",
+            "--input", f"mongodb-atlas-changelog={ROOT / 'tests' / 'fixtures' / 'mongodb-atlas-changelog.md'}",
             "--out", str(out)]
     assert main(args) == 0
     return data
@@ -198,3 +201,63 @@ def test_tags_stage():
     u = classify(SF_TAX, Update("snowflake", "t", "x", "2026-01-01", "Version 4.1.0", "https://x",
                                 tags=["Client/Driver/Library Release"]))
     assert u.capability == "drivers"
+
+
+@pytest.mark.parametrize("title,kind", [
+    ("Draft dashboards removed from Databricks One", "retirement"),
+    ("Legacy feature will be removed in March", "deprecation"),
+    ("Unpaginated requests will soon be rejected", "deprecation"),
+    ("Upcoming general availability of Unity Gateway", "coming-soon"),
+    ("Supervisor API for building agents (Beta)", "release"),
+])
+def test_kind_explicit_only(title, kind):
+    u = classify(TAX, Update("databricks", "t", title, "2026-01-01", title, "https://x"))
+    assert u.kind == kind
+
+
+MDB_FIXTURE = ROOT / "tests" / "fixtures" / "mongodb-atlas-changelog.md"
+MDB_TAX = load_taxonomy(ROOT / "config" / "capabilities" / "mongodb.yaml")
+
+
+def collect_mongodb():
+    spec = next(c for t in load_config(ROOT) if t["id"] == "mongodb" for c in t["collectors"]
+                if c["id"] == "mongodb-atlas-changelog")
+    return [classify(MDB_TAX, u) for u in build("mongodb", spec).collect(str(MDB_FIXTURE))]
+
+
+def test_mongodb_three_bullets():
+    t = {u.title[:40]: u for u in collect_mongodb()}
+    sp = t["Adds support for Google Cloud Pub/Sub as"]
+    assert (sp.capability, sp.status, sp.kind) == ("stream-processing", "", "release")
+    rr = t["Adds support for the $rerank operator in"]
+    assert (rr.capability, rr.status, rr.label) == ("vector-search", "public-preview", "Public Preview")
+    assert not rr.title.startswith("Public Preview")  # label moved out of the title
+    dd = t["Adds additional metrics to the third-par"]
+    assert (dd.capability, dd.status) == ("observability", "")
+
+
+def test_mongodb_dates_labels_ids():
+    ups = collect_mongodb()
+    assert len(ups) == len({u.id for u in ups}) == 12  # skipped: the non-date heading
+    oct_ = [u for u in ups if u.date == "2026-10-01"]
+    assert oct_ and all(u.date_precision == "month" for u in oct_)
+    dec = [u for u in ups if u.date == "2025-12-10"]
+    assert dec and all(u.date_precision == "day" for u in dec)
+    assert any(u.date == "2025-12-05" for u in ups)  # zero-padded day
+    iwm = next(u for u in ups if "Intelligent Workload Management" in u.title)
+    assert iwm.status == "ga" and iwm.links[0].endswith("#std-label-intelligent-workload-management")
+    assert iwm.url == "https://www.mongodb.com/docs/atlas/release-notes/changelog/#september-2026"
+    nested = next(u for u in ups if "nested item" in u.title)
+    assert nested.date == "2026-09-01"  # a #### sub-section stays in its release
+    assert nested.links == ["https://www.mongodb.com/docs/atlas/backup/cloud-backup/overview/#std-label-backup-cloud-provider"]
+    bi = next(u for u in ups if "BI Connector" in u.title)
+    assert bi.kind == "deprecation"  # says "end of life", not inferred from "Removes"
+    for u in ups:
+        assert u.validate() == [], u.title
+
+
+def test_month_precision_renders_month(tmp_path):
+    out = tmp_path / "out"
+    run_pipeline(tmp_path, out)
+    page = (out / "mongodb" / "stream-processing.md").read_text()
+    assert "| 2026-10 | " in page and "| 2026-10-01 |" not in page

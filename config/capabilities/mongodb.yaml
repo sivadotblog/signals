@@ -1,0 +1,118 @@
+# MongoDB capability taxonomy.
+#
+# First match wins, by stage: collector hint (product-specific changelogs), item
+# title (`title` regexes), docs links (`paths` prefixes), then default_capability.
+# Within a stage, capabilities are tried top to bottom. Product names sit above
+# side details (networking, regions), so "Stream Processing ... Private Service
+# Connect" lands on Stream Processing.
+# Check the "Other" page after changes:
+#   python -m signals report --tech mongodb
+
+technology: mongodb
+name: MongoDB Atlas
+default_capability: other
+
+doc_path_pattern: '^https://www\.mongodb\.com/docs/([^?#]*)'
+ignore_link_paths: []
+
+# Status comes only from the label MongoDB writes as a bullet prefix
+# ("Public Preview:", "General Availability:"). The collector moves it to `label`.
+# Bullets without a label get no status. "Adds" does not mean GA.
+status_rules:
+  - {value: ga, match: '^general availability$'}
+  - {value: private-preview, match: '^private preview$'}
+  - {value: public-preview, match: '^public preview$|^preview$'}
+  - {value: beta, match: '^beta$'}
+  - {value: experimental, match: '^experimental$'}
+
+# Type only from explicit words. "Removes" alone is not a retirement.
+kind_rules:
+  - {value: retirement, match: '\bdecommission|\bis (?:now )?retired\b'}
+  - {value: deprecation, match: '\bdeprecat|\bend of life\b|\bend-of-life\b|\bstops? support\b|\bno longer supported\b'}
+  - {value: coming-soon, match: '\bwill soon\b|\bcoming soon\b'}
+
+capabilities:
+  - id: stream-processing
+    name: Atlas Stream Processing
+    title: ['\bstream processing\b', '\bstream processors?\b']
+    paths: ['atlas/atlas-stream-processing/']
+
+  - id: vector-search
+    name: Vector Search and reranking
+    title: ['\bvector search\b', '\$rerank\b', '\bre-?rank', '\bsemantic\b', '\bembeddings?\b', '\bvoyage ai\b', '\$vectorsearch\b']
+    paths: ['atlas/atlas-vector-search/', 'voyageai/']
+
+  - id: search
+    name: Atlas Search
+    title: ['\batlas search\b', '\bmongodb search\b', '\bfull-text search\b', '\$search\b', '\bsearch ind']
+    paths: ['atlas/atlas-search/']
+
+  - id: data-federation
+    name: Data Federation and Online Archive
+    title: ['\bdata federation\b', '\bfederated database\b', '\bonline archive\b']
+    paths: ['atlas/data-federation/', 'atlas/online-archive/']
+
+  - id: atlas-sql
+    name: Atlas SQL and BI Connector
+    title: ['\batlas sql\b', '\bbi connector\b', '\bsql interface\b']
+    paths: ['sql-interface/', 'atlas/bi-connection']
+
+  - id: charts
+    name: Charts
+    title: ['\bcharts?\b(?! for)', '\bdashboards?\b']
+    paths: ['charts/']
+
+  - id: atlas-infinite
+    name: Atlas Infinite
+    title: ['\batlas infinite\b']
+    paths: ['atlas/infinite/']
+
+  - id: kubernetes-terraform
+    name: Kubernetes Operator, Terraform and CLI
+    title: ['\bkubernetes\b', '\bterraform\b', '\batlas cli\b', '\bcloudformation\b', '\bpulumi\b']
+    paths: ['atlas/operator/', 'atlas/cli/', 'atlas/terraform']
+
+  - id: admin-api
+    name: Administration API
+    title: ['\badministration api\b', '\badmin api\b', '\bapi\b', '\bendpoints?\b']
+    paths: ['atlas/reference/api-resources', 'api/']
+
+  - id: observability
+    name: Monitoring, logs and observability
+    title: ['\bdatadog\b', '\bmetrics?\b', '\bobservability\b', '\bopentelemetry\b', '\blogs?\b', '\balerts?\b', '\bactivity feed\b', '\bquery (?:shape|profiler|insights)\b', '\bperformance advisor\b', '\bprometheus\b', '\bsplunk\b']
+    paths: ['atlas/monitoring', 'atlas/tutorial/third-party-service-integrations', 'atlas/query-shape-insights', 'atlas/push-logs', 'atlas/export-logs']
+
+  - id: backup
+    name: Backup and restore
+    title: ['\bbackups?\b', '\bsnapshots?\b', '\brestore\b', '\bpoint in time\b']
+    paths: ['atlas/backup/']
+
+  - id: security
+    name: Security and access
+    title: ['\bldap\b', '\boidc\b', '\bsaml\b', '\bx\.509\b', '\biam\b', '\bencryption\b', '\bauthentication\b', '\bauthorization\b', '\bfederated users?\b', '\bfederation\b', '\bservice accounts?\b', '\broles?\b', '\bauditing\b']
+    paths: ['atlas/security', 'atlas/access/', 'atlas/invitations']
+
+  - id: networking
+    name: Networking
+    title: ['\bprivate (?:service connect|endpoints?|link)\b', '\bpeering\b', '\bip access list\b', '\bnetwork']
+    paths: ['atlas/security-private-endpoint', 'atlas/security-vpc-peering']
+
+  - id: data-explorer
+    name: Atlas UI and Data Explorer
+    title: ['\bdata explorer\b', '\batlas ui\b', '\bcompass\b', '\bshell syntax\b']
+    paths: ['atlas/atlas-ui/', 'compass/']
+
+  - id: clusters
+    name: Clusters, tiers and scaling
+    title: ['\bclusters?\b', '\bflex\b', '\bdedicated\b', '\bgen2\b', '\bauto-?scaling\b', '\bsharded\b', '\bnodes?\b', '\bmongodb \d', '\bworkload management\b', '\binitial sync\b']
+    paths: ['atlas/manage-clusters', 'atlas/cluster-', 'atlas/intelligent-workload-management/']
+
+  - id: regions
+    name: Regions and clouds
+    title: ['\bregions?\b', '\bgeography\b']
+    paths: ['atlas/reference/cloud-providers']
+
+  - id: billing
+    name: Billing and organizations
+    title: ['\bbilling\b', '\binvoices?\b', '\bcosts?\b', '\borganizations?\b', '\bprojects?\b']
+    paths: ['atlas/billing']

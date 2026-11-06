@@ -31,6 +31,8 @@ class Update:
     tags: list[str] = field(default_factory=list)  # source categories, if any
     parent_title: str = ""  # digest title when one source item was split into several updates
     capability_hint: str = ""  # set only when the source itself is product-specific
+    label: str = ""  # status label the source states in its structure, e.g. a "Public Preview:" prefix
+    date_precision: str = "day"  # "day", or "month" when the source gives only month and year
 
     # Classifier fields. Set by signals.classify.
     capability: str = ""
@@ -59,6 +61,8 @@ class Update:
             errs.append(f"date {self.date!r} is not YYYY-MM-DD")
         if self.status and self.status not in STATUSES:
             errs.append(f"status {self.status!r} not in {STATUSES}")
+        if self.date_precision not in ("day", "month"):
+            errs.append(f"date_precision {self.date_precision!r} not in ('day', 'month')")
         if self.kind not in KINDS:
             errs.append(f"kind {self.kind!r} not in {KINDS}")
         return errs

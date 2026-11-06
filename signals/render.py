@@ -50,6 +50,14 @@ def esc_link_text(text: str) -> str:
     return esc(text)
 
 
+def show_date(u: Update) -> str:
+    return u.date[:7] if u.date_precision == "month" else u.date
+
+
+def n_updates(n: int) -> str:
+    return f"{n} update" + ("" if n == 1 else "s")
+
+
 def badge(label_map: dict, key: str) -> str:
     if not key:
         return ""
@@ -83,7 +91,7 @@ def table(updates: list[Update], tax: Taxonomy, with_capability: bool = False) -
     head = ["Date"] + (["Capability"] if with_capability else []) + ["Update", "Status", "Type", "Docs"]
     rows = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
     for u in updates:
-        cells = [u.date]
+        cells = [show_date(u)]
         if with_capability:
             cap = tax.get(u.capability)
             cells.append(f"[{esc_link_text(cap.name)}](./{cap.id}.md)" if cap else esc(u.capability))
@@ -121,7 +129,7 @@ def render_technology(out: Path, tax: Taxonomy, updates: dict[str, Update], posi
     caps = cap_order(tax)
     lines = [front(title=tax.name, sidebar_label="Overview", sidebar_position=0, slug=f"/{tax.technology}"),
              f"# {tax.name}\n",
-             f"{len(items)} updates across {sum(1 for c in caps if by_cap.get(c.id))} capabilities.\n",
+             f"{n_updates(len(items))} across {sum(1 for c in caps if by_cap.get(c.id))} capabilities.\n",
              "## Capabilities\n",
              "| Capability | Updates | Latest | GA | Public Preview | Beta |",
              "|---|---|---|---|---|---|"]
@@ -130,7 +138,7 @@ def render_technology(out: Path, tax: Taxonomy, updates: dict[str, Update], posi
         if not us:
             continue
         st = Counter(u.status for u in us)
-        lines.append(f"| [{esc_link_text(c.name)}](./{c.id}.md) | {len(us)} | {us[0].date} "
+        lines.append(f"| [{esc_link_text(c.name)}](./{c.id}.md) | {len(us)} | {show_date(us[0])} "
                      f"| {st['ga']} | {st['public-preview']} | {st['beta']} |")
     lines += ["", f"## Latest {min(LATEST_N, len(items))} updates\n",
               table(items[:LATEST_N], tax, with_capability=True)]
@@ -146,13 +154,13 @@ def render_technology(out: Path, tax: Taxonomy, updates: dict[str, Update], posi
                 f"# {c.name}\n"]
         if c.description:
             body.append(f"{c.description}\n")
-        body.append(f"{len(us)} updates. Latest {us[0].date}." + (f" {counts}." if counts else "") + "\n")
+        body.append(f"{n_updates(len(us))}. Latest {show_date(us[0])}." + (f" {counts}." if counts else "") + "\n")
         body.append(table(us, tax))
         (tdir / f"{c.id}.md").write_text("\n".join(body), encoding="utf-8")
 
     return {"technology": tax.technology, "name": tax.name, "updates": len(items),
             "capabilities": sum(1 for c in caps if by_cap.get(c.id)),
-            "latest": items[0].date if items else ""}
+            "latest": show_date(items[0]) if items else ""}
 
 
 def render_home(out: Path, summaries: list[dict]) -> None:

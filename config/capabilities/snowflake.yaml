@@ -23,7 +23,7 @@ status_rules:
   - value: private-preview
     match: '\bprivate preview\b'
   - value: public-preview
-    match: '\bpublic preview\b|\(preview\)|\bin preview\b|\bto preview\b|\(preview'
+    match: '\bpublic preview\b|\(preview\)'
   - value: beta
     match: '\(beta\)|\bin beta\b'
 

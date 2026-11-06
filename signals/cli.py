@@ -65,7 +65,17 @@ def cmd_collect(args, root: Path, data: Path) -> None:
         ups = store.load(data, t["id"])
         for spec in t.get("collectors", []):
             col = collectors.build(t["id"], spec)
-            new = col.collect(inputs.get(col.id))
+            if inputs and col.id not in inputs:
+                continue  # offline run: only the collectors given an --input
+            try:
+                new = col.collect(inputs.get(col.id))
+            except Exception as e:  # noqa: BLE001
+                # One broken source must not block the others. The store keeps its old records.
+                msg = {"technology": t["id"], "collector": col.id, "error": str(e)[:300]}
+                print(json.dumps(msg), file=sys.stderr)
+                if args.strict:
+                    raise
+                continue
             for u in new:
                 classify(tax, u)
             bad = [(u, u.validate()) for u in new]
@@ -120,6 +130,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("collect")
     p.add_argument("--tech")
+    p.add_argument("--strict", action="store_true", help="stop on the first collector error")
     p.add_argument("--input", action="append", help="COLLECTOR_ID=PATH, read a saved source instead of fetching")
     p = sub.add_parser("classify")
     p.add_argument("--tech")
@@ -130,6 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--other", type=int, default=50)
     p = sub.add_parser("all")
     p.add_argument("--tech", default=None)
+    p.add_argument("--strict", action="store_true")
     p.add_argument("--input", action="append")
     p.add_argument("--out", default=str(ROOT / "site" / "docs"))
     args = ap.parse_args(argv)

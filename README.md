@@ -12,7 +12,7 @@ Collectors read sources such as RSS feeds and write normalized records. Fixed ru
 config/technologies.yaml            technologies and their collectors
 config/capabilities/<tech>.yaml     capability taxonomy and matching rules
 signals/model.py                    normalized Update record
-signals/collectors/                 collector registry; rss.py (generic RSS), snowflake_docs.py, common.py
+signals/collectors/                 collector registry; rss.py, markdown_changelog.py, snowflake_docs.py, common.py
 signals/classify.py                 capability, status and type rules
 signals/store.py                    data/<tech>/updates.jsonl
 signals/render.py                   Docusaurus markdown
@@ -36,11 +36,15 @@ Each update is one JSON line.
 | `tags` | collector | source categories, if any |
 | `parent_title` | collector | digest title, when one item was split into several updates |
 | `capability_hint` | collector | only for product-specific sources |
+| `label` | collector | status label the source states in its structure, e.g. a `Public Preview:` prefix |
+| `date_precision` | collector | `day`, or `month` when the source gives only month and year (shown as `YYYY-MM`) |
 | `capability` | classifier | capability id from the taxonomy |
 | `status` | classifier | `ga`, `public-preview`, `beta`, `private-preview`, `experimental`, or empty |
 | `kind` | classifier | `release`, `coming-soon`, `deprecation`, `retirement` |
 
 Status is the status the announcement gave on its date. It is not the current status. A feature that went from Beta to GA has two rows.
+
+Status and type are set only from words the vendor wrote as a label: "(Beta)", "is now generally available", "Public Preview:", "is retired", "end of life", "will soon". They are never inferred from verbs like "Adds" or "Removes", and never from summary text. No label means no status badge. It does not mean GA.
 
 ## Classification rules
 
@@ -53,7 +57,7 @@ For each record, the first match wins. Stages run in this order (a taxonomy can 
 5. `links`: each link, turned into a docs path by `doc_path_pattern`, against each capability's `paths` prefixes. Links under `ignore_link_paths` are skipped.
 6. `default_capability`, which is `other`.
 
-Capabilities are tried top to bottom within a stage, so put specific ones above generic ones. Status and type come from regexes over the title. The defaults are in `signals/classify.py`, and a taxonomy can override them with `status_rules` and `kind_rules`.
+Capabilities are tried top to bottom within a stage, so put specific ones above generic ones. Status comes from regexes over `label`, then the title. Type comes from regexes over the title. The defaults are in `signals/classify.py`, and a taxonomy can override them with `status_rules` and `kind_rules`.
 
 To tune the rules, run the report and read the `other` list:
 
@@ -67,7 +71,7 @@ python -m signals report --tech databricks
 ```
 pip install -e ".[dev]"
 pytest -q
-python -m signals collect                  # fetch all sources into data/
+python -m signals collect                  # fetch all sources into data/ (a failing source is logged and skipped; --strict stops)
 python -m signals render                   # write site/docs/
 cd site && npm ci && npm start
 ```
@@ -83,6 +87,7 @@ python -m signals collect --input databricks-rss=tests/fixtures/databricks-feed.
 | Technology | Collector | Source |
 |---|---|---|
 | Databricks | `rss` | `learn.microsoft.com/en-us/azure/databricks/feed.xml`. Digest items are split into one row per bullet. |
+| MongoDB | `markdown-changelog` | Each changelog listed on `mongodb.com/docs/atlas/release-notes/`, read as markdown (URL + `.md`). One row per bullet under a dated `###` heading. 2026 headings give only the month. Product changelogs pass `capability_hint`. |
 | Snowflake | `snowflake-release-notes` | `docs.snowflake.com/en/release-notes/all-release-notes`. No RSS feed, and the `.md` copy is empty. The page embeds its entries as JSON in `__NEXT_DATA__`. Server releases are split into one row per feature. Keywords and change type become tags. |
 
 ## Add a technology

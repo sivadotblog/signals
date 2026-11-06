@@ -14,9 +14,11 @@ Capability, first match wins. Stages run in the taxonomy's `match_order`, defaul
 Then the taxonomy's `default_capability`.
 Within a stage, capabilities are tried in file order. Put specific ones first.
 
-Status: first `status_rules` regex that matches the title. No match means "".
-Kind: first `kind_rules` regex that matches the title, then the first summary
-sentence. No match means "release".
+Status and kind are set only from words the vendor wrote as a label. They are
+never inferred from verbs like "Adds" or "Removes", and never from the summary.
+Status: first `status_rules` regex that matches the collector's `label`, then the
+title. No match means "", which shows as no badge. No label does not mean GA.
+Kind: first `kind_rules` regex that matches the title. No match means "release".
 
 Taxonomies can override status_rules and kind_rules. The defaults below are
 generic release vocabulary and name no product.
@@ -41,13 +43,11 @@ DEFAULT_STATUS_RULES = [
 ]
 
 DEFAULT_KIND_RULES = [
-    ("retirement", r"\b(?:is|are|has been|have been) (?:now )?(?:retired|removed)\b"),
+    ("retirement", r"\b(?:is|are|has been|have been) (?:now )?retired\b|(?<!be )\bremoved\b"),  # "will be removed" is a deprecation
     ("deprecation", r"\bdeprecat|\bscheduled for retirement\b|\bend of (?:life|support)\b|\bend-of-life\b"
-                    r"|\bupcoming (?:removal|retirement|end)\b|\bwill (?:soon )?be (?:retired|removed|rejected|deprecated)\b"
+                    r"|\bupcoming (?:removal|retirement)\b|\bwill (?:soon )?be (?:retired|removed|deprecated|rejected)\b"
                     r"|\bno longer (?:be )?(?:supported|available)\b"),
-    ("coming-soon", r"\bwill soon\b|\bsoon be\b|\bcoming soon\b|\bplans? to\b|\bupcoming\b"
-                    r"|\bstarting in (?:january|february|march|april|may|june|july|august|september|october|november|december)\b"
-                    r"|\bbeginning in\b"),
+    ("coming-soon", r"^upcoming\b|\bwill soon\b|\bcoming soon\b|\bwill (?:ga|be generally available) soon\b"),
 ]
 
 
@@ -144,10 +144,6 @@ def doc_path(tax: Taxonomy, url: str) -> str | None:
     return m.group(1).strip("/") if m else None
 
 
-def first_sentence(text: str) -> str:
-    return re.split(r"(?<=[.!?])\s", text.strip(), maxsplit=1)[0] if text else ""
-
-
 def _by_text(tax: Taxonomy, text: str) -> str | None:
     if text:
         for c in tax.capabilities:
@@ -193,15 +189,16 @@ def capability_for(tax: Taxonomy, u: Update) -> str:
 
 
 def status_for(tax: Taxonomy, u: Update) -> str:
-    return next((v for v, rx in tax.status_rules if rx.search(u.title)), "")
+    for text in (u.label, u.title):
+        if text:
+            found = next((v for v, rx in tax.status_rules if rx.search(text)), "")
+            if found:
+                return found
+    return ""
 
 
 def kind_for(tax: Taxonomy, u: Update) -> str:
-    for text in (u.title, first_sentence(u.summary)):
-        for v, rx in tax.kind_rules:
-            if rx.search(text):
-                return v
-    return "release"
+    return next((v for v, rx in tax.kind_rules if rx.search(u.title)), "release")
 
 
 def classify(tax: Taxonomy, u: Update) -> Update:

@@ -25,3 +25,27 @@ technologies:
         split_digest: true
         no_split_title: '\(general availability\)|\(preview\)|\(public preview\)|\(private preview\)|generally available|behavior change'
         no_split_bullet: '\b20\d\d\b'
+
+  - id: mongodb
+    name: MongoDB Atlas
+    # No feed. Each changelog listed on docs/atlas/release-notes/ has a markdown copy (URL + .md).
+    # Product-specific changelogs pass capability_hint.
+    collectors:
+      - id: mongodb-atlas-changelog
+        type: markdown-changelog
+        url: https://www.mongodb.com/docs/atlas/release-notes/changelog.md
+        page_url: https://www.mongodb.com/docs/atlas/release-notes/changelog/
+      - id: mongodb-stream-processing-changelog
+        type: markdown-changelog
+        url: https://www.mongodb.com/docs/atlas/atlas-stream-processing/changelog.md
+        page_url: https://www.mongodb.com/docs/atlas/atlas-stream-processing/changelog/
+        capability_hint: stream-processing
+      - id: mongodb-search-changelog
+        type: markdown-changelog
+        url: https://www.mongodb.com/docs/atlas/search-changelog.md
+        page_url: https://www.mongodb.com/docs/atlas/search-changelog/
+      - id: mongodb-charts-changelog
+        type: markdown-changelog
+        url: https://www.mongodb.com/docs/charts/release-notes.md
+        page_url: https://www.mongodb.com/docs/charts/release-notes/
+        capability_hint: charts

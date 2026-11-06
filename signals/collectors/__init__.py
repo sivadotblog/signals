@@ -32,4 +32,4 @@ def build(technology: str, spec: dict):
 
 
 # Import built-in collectors so they register.
-from . import rss, snowflake_docs  # noqa: E402,F401
+from . import markdown_changelog, rss, snowflake_docs  # noqa: E402,F401
