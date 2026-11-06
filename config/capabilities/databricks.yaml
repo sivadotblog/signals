@@ -1,0 +1,239 @@
+# Databricks capability taxonomy.
+#
+# Matching is first match wins, in this order of stages:
+#   digest title, then item title (against `title` regexes),
+#   then docs links (against `paths` prefixes), then default_capability.
+# Within a stage, capabilities are tried top to bottom. Keep specific ones above generic ones.
+# Regexes are case-insensitive. Check the "Other" page after changes:
+#   python -m signals report --tech databricks
+
+technology: databricks
+name: Databricks
+default_capability: other
+
+# Turns a docs URL into a path for `paths` matching. Group 1 is the path.
+doc_path_pattern: '^https://learn\.microsoft\.com/(?:[a-z]{2}-[a-z]{2}/)?azure/databricks/([^?#]*)'
+
+capabilities:
+  - id: lakebase
+    name: Lakebase
+    description: Managed Postgres (OLTP) on Databricks.
+    title: ['\blakebase\b']
+    paths: ['oltp/']
+
+  - id: drivers
+    name: Drivers
+    description: JDBC, ODBC and other client drivers.
+    title: ['\bjdbc\b', '\bodbc\b', '\bdriver\b']
+    paths: ['integrations/jdbc', 'integrations/odbc']
+
+  - id: unity-gateway
+    name: Unity Gateway and models
+    description: Unity Gateway (AI gateway), hosted model availability and retirement, AI budgets, skills and coding agents through the gateway.
+    title:
+      - '\bunity gateway\b'
+      - '\bai gateway\b'
+      - '\bfoundation model'
+      - '\b(?:deepseek|openai|gpt-\d|anthropic|claude|gemini|llama|mistral|qwen|kimi|moonshot|inkling|thinking machine|typesafe ai)\b'
+      - '\bcodex\b'
+      - '\bug cli\b'
+    paths: ['ai-gateway/', 'unity-gateway/', 'machine-learning/foundation-model-apis/', 'machine-learning/model-serving/foundation-model']
+
+  - id: genie-code
+    name: Genie Code
+    title: ['\bgenie code\b']
+    paths: ['genie-code/']
+
+  - id: genie-agents
+    name: Genie Agents
+    title: ['\bgenie agents?\b']
+    paths: ['genie-agents/']
+
+  - id: genie-one
+    name: Genie One
+    title: ['\bgenie one\b']
+    paths: ['genie-one/']
+
+  - id: genie
+    name: Genie spaces
+    description: Genie spaces, Genie apps for Slack and Teams, and other Genie features.
+    title: ['\bgenie\b', '\bexternal knowledge sources?\b']
+    paths: ['genie/']
+
+  - id: metric-views
+    name: Metric views
+    title: ['\bmetric views?\b']
+    paths: ['metric-views/', 'business-semantics/']
+
+  - id: dashboards
+    name: AI/BI dashboards
+    title: ['\bdashboards?\b', '\bai/bi\b']
+    paths: ['dashboards/']
+
+  - id: lakehouse-rt
+    name: Lakehouse//RT
+    title: ['lakehouse//rt', '\blakehouse rt\b']
+    paths: ['lakehouse-rt/']
+
+  - id: lakeflow-designer
+    name: Lakeflow Designer
+    title: ['\blakeflow designer\b']
+    paths: ['lakeflow-designer/']
+
+  - id: lakeflow-connect
+    name: Lakeflow Connect
+    description: Managed ingestion connectors, Zerobus Ingest and CDC.
+    title: ['\bconnectors?\b', '\blakeflow connect\b', '\bzerobus\b', '\bcdc\b', '\bmanaged ingestion\b']
+    paths: ['ingestion/', 'connect/']
+
+  - id: lakeflow-jobs
+    name: Lakeflow Jobs
+    title: ['\blakeflow jobs?\b', '\bjobs?\b', '\btasks? for jobs\b']
+    paths: ['jobs/']
+
+  - id: lakeflow-pipelines
+    name: Lakeflow Pipelines and streaming
+    description: Lakeflow Spark Declarative Pipelines, real-time mode and Structured Streaming.
+    title: ['\bpipelines?\b', '\bdlt\b', '\breal-time mode\b', '\btransformwithstate\b', '\bstreaming\b']
+    paths: ['ldp/', 'dlt/', 'structured-streaming/']
+
+  - id: ai-functions
+    name: AI Functions
+    title: ['\bai functions?\b', '\bai_[a-z_]+\b']
+    paths: ['large-language-models/ai-functions']
+
+  - id: agents
+    name: Agent Bricks and AI agents
+    description: Agent Bricks, agent framework, MCP and agent tooling outside Genie.
+    title: ['\bagent bricks\b', '\bagent framework\b', '\bai agents?\b', '\bmcp\b', '\bai playground\b', '\bjailbreaks?\b']
+    paths: ['generative-ai/', 'agent-bricks/']
+
+  - id: model-serving
+    name: Model Serving
+    title: ['\bmodel serving\b', '\bserving endpoints?\b']
+    paths: ['machine-learning/model-serving/']
+
+  - id: vector-search
+    name: Vector Search
+    title: ['\bvector search\b']
+    paths: ['vector-search/']
+
+  - id: mlflow
+    name: MLflow and machine learning
+    title: ['\bmlflow\b', '\bai runtime\b', '\bfeature store\b', '\bautoml\b', '\bmachine learning\b']
+    paths: ['mlflow/', 'machine-learning/']
+
+  - id: data-quality
+    name: Data quality and classification
+    title: ['\bdata quality\b', '\blakehouse monitoring\b', '\banomaly detection\b', '\bdata classification\b']
+    paths: ['data-quality-monitoring/', 'lakehouse-monitoring/', 'data-governance/unity-catalog/data-classification']
+
+  - id: clean-rooms
+    name: Clean Rooms
+    title: ['\bclean rooms?\b']
+    paths: ['clean-rooms/']
+
+  - id: delta-sharing
+    name: Delta Sharing and Marketplace
+    title: ['\bdelta sharing\b', '\bmarketplace\b']
+    paths: ['delta-sharing/', 'marketplace/']
+
+  - id: federation
+    name: Lakehouse Federation
+    title: ['\blakehouse federation\b', '\bquery federation\b', '\bcatalog federation\b', '\bforeign catalogs?\b']
+    paths: ['query-federation/']
+
+  - id: serverless
+    name: Serverless compute
+    title: ['\bserverless\b']
+    paths: ['compute/serverless']
+
+  - id: delta-iceberg
+    name: Delta Lake and Iceberg
+    description: Table formats, transactions, clustering and optimization.
+    title: ['\bdelta\b', '\biceberg\b', '\bliquid clustering\b', '\bpredictive optimization\b', '\btransactions?\b']
+    paths: ['delta/', 'iceberg/', 'optimizations/', 'transactions/']
+
+  - id: unity-catalog
+    name: Unity Catalog
+    title:
+      - '\bunity catalog\b'
+      - '\babac\b'
+      - '\brow filters?\b'
+      - '\bcolumn masks?\b'
+      - '\bexternal locations?\b'
+      - '\bvolumes?\b'
+      - '\baccess requests?\b'
+      - '\brequest for access\b'
+      - '\blineage\b'
+      - '\bmanaged tables?\b'
+      - '\bcatalog explorer\b'
+    paths: ['data-governance/', 'catalogs/', 'volumes/', 'tables/', 'discover/', 'catalog-explorer/']
+
+  - id: migration
+    name: Migration
+    title: ['\blakebridge\b', '\bcode converter\b', '\bmigrat']
+    paths: ['migration/']
+
+  - id: billing
+    name: Billing and budgets
+    title: ['\bbudgets?\b', '\bspend\b', '\bbilling\b', '\bcosts?\b', '\bpricing\b', '\bdbus?\b']
+    paths: ['admin/account-settings/budgets', 'admin/usage/']
+
+  - id: system-tables
+    name: System tables and observability
+    title: ['\bsystem tables?\b', '\bobservability\b', '\blog delivery\b']
+    paths: ['admin/system-tables/']
+
+  - id: databricks-sql
+    name: Databricks SQL
+    description: SQL warehouses, SQL editor, query features, SQL language and file formats.
+    title: ['\bdatabricks sql\b', '\bsql warehouses?\b', '\bsql editor\b', '\bquery history\b', '\bsql\b', '\bfile format\b']
+    paths: ['sql/', 'query/']
+
+  - id: runtime
+    name: Databricks Runtime
+    title: ['\bdatabricks runtime\b', '\bruntime \d', '\bphoton\b', '\bapache spark\b']
+    paths: ['release-notes/runtime/', 'compute/runtime']
+
+  - id: compute
+    name: Compute
+    description: Classic compute, instance types, pools and GPUs.
+    title: ['\bcompute\b', '\bclusters?\b', '\binstance types?\b', '\bgpus?\b', '\bpools?\b']
+    paths: ['compute/']
+
+  - id: apps
+    name: Databricks Apps
+    title: ['\bdatabricks apps\b']
+    paths: ['dev-tools/databricks-apps/']
+
+  - id: dev-tools
+    name: Developer tools
+    description: CLI, SDKs, Asset Bundles, Terraform, IDEs, REST API and Git.
+    title: ['\bcli\b', '\bsdks?\b', '\basset bundles?\b', '\bbundles?\b', '\bterraform\b', '\bvs code\b', '\brest api\b', '\bapis?\b', '\bssh\b', '\bgit\b', '\bpyproject']
+    paths: ['dev-tools/', 'repos/', 'reference/']
+
+  - id: notebooks
+    name: Notebooks and Assistant
+    title: ['\bnotebooks?\b', '\bassistant\b', '\bworkspace files?\b']
+    paths: ['notebooks/', 'files/']
+
+  - id: networking
+    name: Networking
+    title: ['\bprivate (?:link|endpoints?|connectivity)\b', '\bingress\b', '\begress\b', '\bnetwork', '\bfirewall\b', '\bcontrol planes?\b', '\bvnet\b', '\bip access\b']
+    paths: ['security/network/']
+
+  - id: security-identity
+    name: Security and identity
+    title: ['\boauth\b', '\bscim\b', '\bsso\b', '\bidentity\b', '\bpermissions?\b', '\bprivileges?\b', '\bacls?\b', '\bservice principals?\b', '\bsecurity\b(?! profile)', '\baudit logs?\b', '\bsecrets?\b']
+    paths: ['security/', 'admin/users-groups/', 'admin/access-control/']
+
+  - id: compliance-regions
+    name: Compliance and regions
+    title: ['\bfedramp\b', '\bhipaa\b', '\bcompliance\b', '\bregions?\b', '\bprocessed in\b', '\bsla\b', '\bservice level agreement\b']
+    paths: ['security/privacy/', 'resources/supported-regions']
+
+  - id: admin
+    name: Workspace administration
+    title: ['\bworkspaces?\b', '\badmins?\b', '\bpreviews page\b', '\baccount console\b']
+    paths: ['admin/']

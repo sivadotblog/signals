@@ -1,0 +1,18 @@
+# Technologies on the site, in sidebar order.
+# Each technology needs config/capabilities/<id>.yaml.
+# Each collector entry: id (unique, stable: it is part of every record id), type, then type params.
+
+technologies:
+  - id: databricks
+    name: Databricks
+    collectors:
+      - id: databricks-rss
+        type: rss
+        url: https://learn.microsoft.com/en-us/azure/databricks/feed.xml
+        split_digest: true
+
+  # - id: snowflake
+  #   name: Snowflake
+  #   collectors:
+  #     - id: snowflake-release-notes
+  #       type: ...   # add a collector under signals/collectors/ if the source is not RSS

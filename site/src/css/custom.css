@@ -1,0 +1,23 @@
+/* Wide pages: update tables need the room. */
+.main-wrapper .container {
+  max-width: 1400px;
+}
+
+.markdown table {
+  display: table;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.markdown table td:first-child {
+  white-space: nowrap;
+}
+
+.markdown table small {
+  color: var(--ifm-color-emphasis-700);
+}
+
+.markdown table .badge {
+  white-space: nowrap;
+  font-weight: 500;
+}

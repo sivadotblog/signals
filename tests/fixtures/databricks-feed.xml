@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Azure Databricks Release Notes</title>
+    <link>https://learn.microsoft.com/en-us/azure/databricks/</link>
+    <description>Fixture built from real item shapes. Descriptions use root-relative links.</description>
+    <item>
+      <title>Genie Agents enhancements</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/november#genie-agents-enhancements</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/november#genie-agents-enhancements</guid>
+      <pubDate>Mon, 02 Nov 2026 00:00:00 Z</pubDate>
+      <category>Genie</category>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Analyze files in Unity Catalog volumes (Public Preview)&lt;/strong&gt;: A Genie Agent can now analyze unstructured files stored in Unity Catalog volumes. See &lt;a href="/azure/databricks/genie-agents/volumes"&gt;Analyze files in volumes with a Genie Agent&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Agent memory&lt;/strong&gt;: Genie Agents remember earlier turns. See &lt;a href="/azure/databricks/genie-agents/memory"&gt;Memory&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>Lakebase snapshots and backup schedule APIs are generally available</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#lakebase-snapshots-and-backup-schedule-apis-are-generally-available</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#lakebase-snapshots-and-backup-schedule-apis-are-generally-available</guid>
+      <pubDate>Mon, 26 Oct 2026 00:00:00 Z</pubDate>
+      <description>&lt;p&gt;The snapshots and backup schedule APIs are now generally available. See &lt;a href="/azure/databricks/oltp/projects/snapshots"&gt;Snapshots&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Okta connector is available in Beta</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/november#okta-connector-is-available-in-beta</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/november#okta-connector-is-available-in-beta</guid>
+      <pubDate>Tue, 03 Nov 2026 00:00:00 Z</pubDate>
+      <description>&lt;p&gt;The managed Okta connector is now available in Beta in Databricks Lakeflow Connect. See &lt;a href="/azure/databricks/ingestion/lakeflow-connect/okta"&gt;Okta&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>DeepSeek V4 Flash (0731) is retired</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/november#deepseek-v4-flash-0731-is-retired</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/november#deepseek-v4-flash-0731-is-retired</guid>
+      <pubDate>Thu, 05 Nov 2026 00:00:00 Z</pubDate>
+      <description>&lt;p&gt;DeepSeek V4 Flash (0731) is retired as of November 5, 2026.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Genie Ontology snippets will soon be generally available and enabled by default</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#genie-ontology-snippets</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#genie-ontology-snippets</guid>
+      <pubDate>Wed, 28 Oct 2026 00:00:00 Z</pubDate>
+      <description>&lt;p&gt;Ontology snippets in Genie spaces | soon GA &amp;lt;tag&amp;gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Something with no matching rule</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#something</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#something</guid>
+      <pubDate>Tue, 20 Oct 2026 00:00:00 Z</pubDate>
+      <description>&lt;p&gt;See &lt;a href="/azure/databricks/oltp/projects/branches"&gt;Branches&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Truly unmatched item</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#unmatched</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/october#unmatched</guid>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 Z</pubDate>
+      <description>&lt;p&gt;No links.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,106 @@
+# Signals
+
+A doc site of product updates. One section per technology. One page per capability. Each page is one table of updates, newest first.
+
+Site: https://sivadotblog.github.io/signals/
+
+Collectors read sources such as RSS feeds and write normalized records. Fixed rules in a YAML file assign each record a capability, a status and a type. The renderer turns the records into Docusaurus pages. No model is involved. The same inputs always produce the same bytes.
+
+## Layout
+
+```
+config/technologies.yaml            technologies and their collectors
+config/capabilities/<tech>.yaml     capability taxonomy and matching rules
+signals/model.py                    normalized Update record
+signals/collectors/                 collector registry; rss.py is the generic RSS collector
+signals/classify.py                 capability, status and type rules
+signals/store.py                    data/<tech>/updates.jsonl
+signals/render.py                   Docusaurus markdown
+data/<tech>/updates.jsonl           collected records (committed; the store only grows)
+site/                               Docusaurus site; site/docs/ is generated
+.github/workflows/signals.yml       daily collect, commit data, build, deploy to Pages
+```
+
+## Record
+
+Each update is one JSON line.
+
+| Field | Set by | Meaning |
+|---|---|---|
+| `id` | framework | hash of `source` and `source_id` |
+| `technology` | collector | technology id |
+| `source`, `source_id` | collector | collector id, stable id inside the source |
+| `date` | collector | announcement date, `YYYY-MM-DD` |
+| `title`, `url`, `summary` | collector | announcement text and where to read it |
+| `links` | collector | absolute URLs found in the item |
+| `tags` | collector | source categories, if any |
+| `parent_title` | collector | digest title, when one item was split into several updates |
+| `capability_hint` | collector | only for product-specific sources |
+| `capability` | classifier | capability id from the taxonomy |
+| `status` | classifier | `ga`, `public-preview`, `beta`, `private-preview`, `experimental`, or empty |
+| `kind` | classifier | `release`, `coming-soon`, `deprecation`, `retirement` |
+
+Status is the status the announcement gave on its date. It is not the current status. A feature that went from Beta to GA has two rows.
+
+## Classification rules
+
+For each record, the first match wins, in this order:
+
+1. `capability_hint`, if it names a known capability.
+2. `parent_title` against each capability's `title` regexes.
+3. `title` against each capability's `title` regexes.
+4. Each link, turned into a docs path by `doc_path_pattern`, against each capability's `paths` prefixes.
+5. `default_capability`, which is `other`.
+
+Capabilities are tried top to bottom, so put specific ones above generic ones. Status and type come from regexes over the title. The defaults are in `signals/classify.py`, and a taxonomy can override them with `status_rules` and `kind_rules`.
+
+To tune the rules, run the report and read the `other` list:
+
+```
+python -m signals classify
+python -m signals report --tech databricks
+```
+
+## Run locally
+
+```
+pip install -e ".[dev]"
+pytest -q
+python -m signals collect                  # fetch all sources into data/
+python -m signals render                   # write site/docs/
+cd site && npm ci && npm start
+```
+
+Offline, with a saved feed:
+
+```
+python -m signals collect --input databricks-rss=tests/fixtures/databricks-feed.xml
+```
+
+## Add a technology (for example Snowflake)
+
+1. Add an entry to `config/technologies.yaml` with its collectors.
+2. Add `config/capabilities/snowflake.yaml`. Copy the Databricks file for the shape. Set `doc_path_pattern` for the Snowflake docs URLs. If Snowflake uses different status words, override `status_rules`.
+3. If the source is RSS, the `rss` collector type is enough. Otherwise add a collector:
+
+```python
+# signals/collectors/my_source.py
+from ..model import Update
+from . import register
+
+@register("my-source")
+class MySource:
+    def __init__(self, technology: str, id: str, url: str):
+        self.technology, self.id, self.url = technology, id, url
+
+    def collect(self, input_path: str | None = None) -> list[Update]:
+        ...  # return Update records; leave capability, status and kind to the classifier
+```
+
+Then import the new module at the bottom of `signals/collectors/__init__.py`.
+
+Collector ids are part of every record id. Do not rename one after data exists.
+
+## GitHub Pages
+
+In the repo settings, under Pages, set the source to "GitHub Actions". The workflow deploys on every run.
