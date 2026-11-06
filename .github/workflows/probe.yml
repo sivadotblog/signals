@@ -1,0 +1,29 @@
+name: probe
+on:
+  push:
+    branches: [probe/snowflake]
+    paths: [".github/workflows/probe.yml"]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Snowflake pages
+        run: |
+          mkdir -p probe
+          UA="signals-collector/0.1 (+https://github.com/sivadotblog/signals)"
+          curl -sSL -A "$UA" -o probe/all-release-notes.html https://docs.snowflake.com/en/release-notes/all-release-notes
+          curl -sSL -A "$UA" -o probe/all-release-notes.md https://docs.snowflake.com/en/release-notes/all-release-notes.md || true
+          curl -sSL -A "$UA" -o probe/llms.txt https://docs.snowflake.com/llms.txt || true
+          curl -sSL -A "$UA" -o probe/entry.html https://docs.snowflake.com/en/release-notes/2026/other/2026-10-20-snowflake-provided-tags || true
+          curl -sSL -A "$UA" -o probe/server-10-38.html https://docs.snowflake.com/en/release-notes/2026/10_38 || true
+          ls -la probe
+      - name: Commit
+        run: |
+          git config user.name "signals-bot"
+          git config user.email "signals-bot@users.noreply.github.com"
+          git add probe
+          git commit -m "probe: snowflake pages"
+          git push
