@@ -2,13 +2,16 @@
 
 Reads config/capabilities/<technology>.yaml and sets capability, status and kind.
 
-Capability, first match wins, stages in this order:
-  1. capability_hint from the collector, if it names a known capability.
-  2. parent_title (digest title) against each capability's `title` regexes.
-  3. title against each capability's `title` regexes.
-  4. each link, in order, turned into a docs path by `doc_path_pattern`,
-     against each capability's `paths` prefixes. Links under `ignore_link_paths` are skipped.
-  5. the taxonomy's `default_capability`.
+Capability, first match wins. Stages run in the taxonomy's `match_order`, default
+  hint, parent_title, title, tags, links:
+  hint          capability_hint from the collector, if it names a known capability.
+  parent_title  digest title against each capability's `title` regexes.
+  title         item title against each capability's `title` regexes.
+  tags          source tags against each capability's `tags` list (exact, case-insensitive).
+  links         each link, in order, turned into a docs path by `doc_path_pattern`,
+                against each capability's `paths` prefixes. Links under
+                `ignore_link_paths` are skipped.
+Then the taxonomy's `default_capability`.
 Within a stage, capabilities are tried in file order. Put specific ones first.
 
 Status: first `status_rules` regex that matches the title. No match means "".
@@ -41,7 +44,7 @@ DEFAULT_KIND_RULES = [
     ("retirement", r"\b(?:is|are|has been|have been) (?:now )?(?:retired|removed)\b"),
     ("deprecation", r"\bdeprecat|\bscheduled for retirement\b|\bend of (?:life|support)\b|\bend-of-life\b"
                     r"|\bupcoming (?:removal|retirement|end)\b|\bwill (?:soon )?be (?:retired|removed|rejected|deprecated)\b"
-                    r"|\bno longer (?:be )?supported\b"),
+                    r"|\bno longer (?:be )?(?:supported|available)\b"),
     ("coming-soon", r"\bwill soon\b|\bsoon be\b|\bcoming soon\b|\bplans? to\b|\bupcoming\b"
                     r"|\bstarting in (?:january|february|march|april|may|june|july|august|september|october|november|december)\b"
                     r"|\bbeginning in\b"),
@@ -55,6 +58,7 @@ class Capability:
     description: str
     title: list[re.Pattern]
     paths: list[str]
+    tags: set[str]
 
 
 @dataclass
@@ -67,6 +71,7 @@ class Taxonomy:
     capabilities: list[Capability]
     status_rules: list[tuple[str, re.Pattern]]
     kind_rules: list[tuple[str, re.Pattern]]
+    match_order: list[str]
 
     def content_links(self, links: list[str]) -> list[str]:
         """Links minus the ones that point at boilerplate pages (release types, previews page)."""
@@ -104,10 +109,11 @@ def load_taxonomy(path: Path) -> Taxonomy:
             id=c["id"], name=c["name"], description=c.get("description", ""),
             title=[re.compile(rx, re.I) for rx in c.get("title", [])],
             paths=list(c.get("paths", [])),
+            tags={t.lower() for t in c.get("tags", [])},
         ))
     default = raw.get("default_capability", "other")
     if default not in seen:
-        caps.append(Capability(default, "Other", "Updates no rule matched. Tune the taxonomy from this page.", [], []))
+        caps.append(Capability(default, "Other", "Updates no rule matched. Tune the taxonomy from this page.", [], [], set()))
     pattern = raw.get("doc_path_pattern")
     return Taxonomy(
         technology=raw["technology"], name=raw.get("name", raw["technology"]),
@@ -117,7 +123,18 @@ def load_taxonomy(path: Path) -> Taxonomy:
         capabilities=caps,
         status_rules=_rules(raw.get("status_rules", DEFAULT_STATUS_RULES), STATUSES),
         kind_rules=_rules(raw.get("kind_rules", DEFAULT_KIND_RULES), KINDS),
+        match_order=_match_order(raw.get("match_order", DEFAULT_MATCH_ORDER)),
     )
+
+
+DEFAULT_MATCH_ORDER = ["hint", "parent_title", "title", "tags", "links"]
+
+
+def _match_order(order: list[str]) -> list[str]:
+    bad = [s for s in order if s not in DEFAULT_MATCH_ORDER]
+    if bad:
+        raise ValueError(f"match_order has unknown stages {bad}; allowed {DEFAULT_MATCH_ORDER}")
+    return list(order)
 
 
 def doc_path(tax: Taxonomy, url: str) -> str | None:
@@ -131,22 +148,47 @@ def first_sentence(text: str) -> str:
     return re.split(r"(?<=[.!?])\s", text.strip(), maxsplit=1)[0] if text else ""
 
 
-def capability_for(tax: Taxonomy, u: Update) -> str:
-    if u.capability_hint and tax.get(u.capability_hint):
-        return u.capability_hint
-    for text in (u.parent_title, u.title):
-        if not text:
-            continue
+def _by_text(tax: Taxonomy, text: str) -> str | None:
+    if text:
         for c in tax.capabilities:
             if any(rx.search(text) for rx in c.title):
                 return c.id
-    for link in tax.content_links(u.links):
+    return None
+
+
+def _by_tags(tax: Taxonomy, tags: list[str]) -> str | None:
+    have = {t.lower() for t in tags}
+    for c in tax.capabilities:
+        if c.tags & have:
+            return c.id
+    return None
+
+
+def _by_links(tax: Taxonomy, links: list[str]) -> str | None:
+    for link in tax.content_links(links):
         p = doc_path(tax, link)
         if p is None:
             continue
         for c in tax.capabilities:
             if any(p == pre.strip("/") or p.startswith(pre) for pre in c.paths):
                 return c.id
+    return None
+
+
+def capability_for(tax: Taxonomy, u: Update) -> str:
+    for stage in tax.match_order:
+        if stage == "hint":
+            found = u.capability_hint if u.capability_hint and tax.get(u.capability_hint) else None
+        elif stage == "parent_title":
+            found = _by_text(tax, u.parent_title)
+        elif stage == "title":
+            found = _by_text(tax, u.title)
+        elif stage == "tags":
+            found = _by_tags(tax, u.tags)
+        else:
+            found = _by_links(tax, u.links)
+        if found:
+            return found
     return tax.default_capability
 
 

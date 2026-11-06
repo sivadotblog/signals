@@ -12,7 +12,7 @@ Collectors read sources such as RSS feeds and write normalized records. Fixed ru
 config/technologies.yaml            technologies and their collectors
 config/capabilities/<tech>.yaml     capability taxonomy and matching rules
 signals/model.py                    normalized Update record
-signals/collectors/                 collector registry; rss.py is the generic RSS collector
+signals/collectors/                 collector registry; rss.py (generic RSS), snowflake_docs.py, common.py
 signals/classify.py                 capability, status and type rules
 signals/store.py                    data/<tech>/updates.jsonl
 signals/render.py                   Docusaurus markdown
@@ -44,15 +44,16 @@ Status is the status the announcement gave on its date. It is not the current st
 
 ## Classification rules
 
-For each record, the first match wins, in this order:
+For each record, the first match wins. Stages run in this order (a taxonomy can change it with `match_order`):
 
-1. `capability_hint`, if it names a known capability.
-2. `parent_title` against each capability's `title` regexes.
-3. `title` against each capability's `title` regexes.
-4. Each link, turned into a docs path by `doc_path_pattern`, against each capability's `paths` prefixes.
-5. `default_capability`, which is `other`.
+1. `hint`: `capability_hint`, if it names a known capability.
+2. `parent_title`: digest or release title against each capability's `title` regexes.
+3. `title`: item title against each capability's `title` regexes.
+4. `tags`: source tags against each capability's `tags` list (exact, case-insensitive).
+5. `links`: each link, turned into a docs path by `doc_path_pattern`, against each capability's `paths` prefixes. Links under `ignore_link_paths` are skipped.
+6. `default_capability`, which is `other`.
 
-Capabilities are tried top to bottom, so put specific ones above generic ones. Status and type come from regexes over the title. The defaults are in `signals/classify.py`, and a taxonomy can override them with `status_rules` and `kind_rules`.
+Capabilities are tried top to bottom within a stage, so put specific ones above generic ones. Status and type come from regexes over the title. The defaults are in `signals/classify.py`, and a taxonomy can override them with `status_rules` and `kind_rules`.
 
 To tune the rules, run the report and read the `other` list:
 
@@ -77,10 +78,17 @@ Offline, with a saved feed:
 python -m signals collect --input databricks-rss=tests/fixtures/databricks-feed.xml
 ```
 
-## Add a technology (for example Snowflake)
+## Sources
+
+| Technology | Collector | Source |
+|---|---|---|
+| Databricks | `rss` | `learn.microsoft.com/en-us/azure/databricks/feed.xml`. Digest items are split into one row per bullet. |
+| Snowflake | `snowflake-release-notes` | `docs.snowflake.com/en/release-notes/all-release-notes`. No RSS feed, and the `.md` copy is empty. The page embeds its entries as JSON in `__NEXT_DATA__`. Server releases are split into one row per feature. Keywords and change type become tags. |
+
+## Add a technology
 
 1. Add an entry to `config/technologies.yaml` with its collectors.
-2. Add `config/capabilities/snowflake.yaml`. Copy the Databricks file for the shape. Set `doc_path_pattern` for the Snowflake docs URLs. If Snowflake uses different status words, override `status_rules`.
+2. Add `config/capabilities/<id>.yaml`. Copy an existing file for the shape. Set `doc_path_pattern` for the docs URLs. If the vendor uses different status words, override `status_rules` (see the Snowflake file).
 3. If the source is RSS, the `rss` collector type is enough. Otherwise add a collector:
 
 ```python

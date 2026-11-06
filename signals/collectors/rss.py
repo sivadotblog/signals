@@ -7,55 +7,25 @@ bold title and a colon, e.g.
 Each such list item becomes its own Update, with the feed title kept as parent_title.
 
 Params (from technologies.yaml):
-  url            feed URL
-  split_digest   split digest items, default false
-  link_base      base URL for relative links in descriptions, default: the item link
-  title_include  optional regex; keep only items whose title matches
-  title_exclude  optional regex; drop items whose title matches
-  no_split_title optional regex; never split items whose title matches, e.g. one
-                 announcement with a status ("... (Beta)") that lists its parts as bullets
-  no_split_bullet optional regex; never split an item if any bullet title matches,
-                 e.g. timeline bullets that are dates
-  split_min_words bullets need at least this many words in their title to split, default 2
+  url             feed URL
+  split_digest    split digest items, default false
+  link_base       base URL for relative links in descriptions, default: the item link
+  title_include   optional regex; keep only items whose title matches
+  title_exclude   optional regex; drop items whose title matches
+  no_split_title, no_split_bullet, split_min_words   see common.DigestSplitter
 """
 
 from __future__ import annotations
 
 import re
-import time
-import urllib.request
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 from html import unescape
 from pathlib import Path
-from urllib.parse import urljoin
 
 from ..model import Update
 from . import register
-
-UA = "signals-collector/0.1 (+https://github.com/sivadotblog/signals)"
-LI_RE = re.compile(r"<li\b[^>]*>(.*?)</li>", re.I | re.S)
-DIGEST_LI_RE = re.compile(r"^\s*<(strong|b)>(.*?)</\1>\s*:?\s*(.*)$", re.I | re.S)
-HREF_RE = re.compile(r'href\s*=\s*"([^"]+)"', re.I)
-TAG_RE = re.compile(r"<[^>]+>")
-
-
-def fetch(url: str, retries: int = 3) -> str:
-    last = None
-    for attempt in range(retries):
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=60) as r:
-                return r.read().decode("utf-8", "replace")
-        except Exception as e:  # noqa: BLE001
-            last = e
-            time.sleep(2 * (attempt + 1))
-    raise RuntimeError(f"fetch failed: {url}: {last}")
-
-
-def text_of(html: str) -> str:
-    text = " ".join(unescape(TAG_RE.sub(" ", html)).split())
-    return re.sub(r"\s+([.,;:!?)])", r"\1", text)  # tags leave a space before punctuation
+from .common import DigestSplitter, fetch, links_in, slug, text_of
 
 
 def iso_date(pub: str) -> str:
@@ -70,19 +40,6 @@ def iso_date(pub: str) -> str:
     return m.group(1) if m else ""
 
 
-def slug(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:80]
-
-
-def links_in(html: str, base: str) -> list[str]:
-    out = []
-    for href in HREF_RE.findall(html):
-        u = urljoin(base, unescape(href))
-        if u.startswith("http") and u not in out:
-            out.append(u)
-    return out
-
-
 @register("rss")
 class RssCollector:
     def __init__(self, technology: str, id: str, url: str, split_digest: bool = False,
@@ -92,13 +49,10 @@ class RssCollector:
         self.technology = technology
         self.id = id
         self.url = url
-        self.split_digest = split_digest
         self.link_base = link_base
         self.include = re.compile(title_include, re.I) if title_include else None
         self.exclude = re.compile(title_exclude, re.I) if title_exclude else None
-        self.no_split_title = re.compile(no_split_title, re.I) if no_split_title else None
-        self.no_split_bullet = re.compile(no_split_bullet, re.I) if no_split_bullet else None
-        self.split_min_words = split_min_words
+        self.splitter = DigestSplitter(split_digest, no_split_title, no_split_bullet, split_min_words)
 
     def collect(self, input_path: str | None = None) -> list[Update]:
         xml = Path(input_path).read_text(encoding="utf-8") if input_path else fetch(self.url)
@@ -126,7 +80,7 @@ class RssCollector:
             tags = sorted({" ".join((c.text or "").split()) for c in item.findall("category") if c.text})
             url = link or guid
 
-            parts = self.digest_parts(title, desc)
+            parts = self.splitter.parts(title, desc)
             if parts:
                 for sub_title, body, li in parts:
                     out.append(Update(
@@ -142,19 +96,3 @@ class RssCollector:
                     links=links_in(desc, base), tags=tags,
                 ))
         return out
-
-    def digest_parts(self, title: str, desc: str) -> list[tuple[str, str, str]]:
-        """(bullet title, bullet body html, bullet html) per digest bullet, or [] to keep the item whole."""
-        if not self.split_digest or (self.no_split_title and self.no_split_title.search(title)):
-            return []
-        parts = []
-        for li in LI_RE.findall(desc):
-            m = DIGEST_LI_RE.match(li)
-            if m:
-                parts.append((text_of(m.group(2)), m.group(3), li))
-        for sub_title, _, _ in parts:
-            if len(sub_title.split()) < self.split_min_words:
-                return []
-            if self.no_split_bullet and self.no_split_bullet.search(sub_title):
-                return []
-        return parts

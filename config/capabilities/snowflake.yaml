@@ -1,0 +1,213 @@
+# Snowflake capability taxonomy.
+#
+# Matching is first match wins, by stage: digest or release title, item title
+# (`title` regexes), source tags (`tags`, exact, case-insensitive), docs links
+# (`paths` prefixes), then default_capability. Within a stage, capabilities are
+# tried top to bottom. Keep specific ones above generic ones.
+# Tags come from the page: each release's keywords plus its changeType.
+# Check the "Other" page after changes:
+#   python -m signals report --tech snowflake
+
+technology: snowflake
+name: Snowflake
+default_capability: other
+
+doc_path_pattern: '^https://docs\.snowflake\.com/(?:en/)?([^?#]*)'
+ignore_link_paths: []
+
+# Snowflake says "Preview" for public preview and "General availability" for GA.
+# Private preview must come before public preview, because "(Private Preview)" also ends in "Preview)".
+status_rules:
+  - value: ga
+    match: '\bgeneral availability\b|\bgenerally available\b|\(ga\)'
+  - value: private-preview
+    match: '\bprivate preview\b'
+  - value: public-preview
+    match: '\bpublic preview\b|\(preview\)|\bin preview\b|\bto preview\b|\(preview'
+  - value: beta
+    match: '\(beta\)|\bin beta\b'
+
+capabilities:
+  - id: drivers
+    name: Clients, drivers and libraries
+    description: Snowflake CLI, SnowSQL, drivers, connectors for Python, Spark and Kafka, Snowpark and Python APIs.
+    title: ['\bdrivers?\b', '\bsnowsql\b', '\bsnowflake cli\b', '\bconnector for (?:python|spark|kafka)\b', '\bsnowpark (?:api|library)\b', '\bpython api\b', '\bingest (?:java )?sdk\b', '\bml python\b']
+    tags: ['Client/Driver/Library Release']
+    paths: ['release-notes/clients-drivers/']
+
+  - id: openflow
+    name: Openflow
+    title: ['\bopenflow\b']
+    tags: ['Openflow Release']
+    paths: ['release-notes/openflow/', 'user-guide/data-integration/openflow/']
+
+  - id: connectors
+    name: Snowflake Connectors
+    description: Native connectors for third-party applications and databases.
+    title: ['\bsnowflake connector for\b', '\bzero-?copy (?:integration|connector)\b', '\bworkday\b']
+    tags: ['Connector Release', 'Zerocopy Connector']
+    paths: ['release-notes/connectors/', 'connectors/']
+
+  - id: ai-gateway
+    name: Cortex AI Gateway
+    title: ['\bai gateway\b']
+    tags: ['Cortex AI Gateway', 'AI gateway']
+
+  - id: models
+    name: Models in Cortex
+    description: Model availability and retirement across AI Functions, Cortex REST API and Cortex Inference.
+    title: ['\b(?:openai|gpt-\d|claude|anthropic|gemini|grok|glm|llama|mistral|deepseek|qwen)\b', '\bmodels?\b(?! deployment)']
+    tags: ['Inference', 'Cortex Inference']
+
+  - id: cowork
+    name: Snowflake CoWork
+    title: ['\bcowork\b', '\bdeep research\b', '\bdocument generation\b']
+    tags: ['Snowflake CoWork', 'CoWork', 'Deep Research']
+
+  - id: coco
+    name: CoCo (Cortex Code)
+    description: CoCo in Snowsight, CoCo Desktop, CoCo for Excel and Google Sheets, coding agent and skills.
+    title: ['\bcoco\b', '\bcortex code\b', '\bcoding agent\b']
+    tags: ['CoCo', 'CoCo Desktop', 'Cortex Code', 'Coding Agent']
+
+  - id: snowflake-intelligence
+    name: Snowflake Intelligence
+    title: ['\bsnowflake intelligence\b']
+
+  - id: cortex-agents
+    name: Cortex Agents and MCP
+    title: ['\bcortex agents?\b', '\bagent sdk\b', '\bmcp\b', '\bagents?\b']
+    tags: ['Cortex Agents', 'Cortex Agent SDK', 'MCP', 'Snowflake Managed MCP']
+
+  - id: cortex-search
+    name: Cortex Search
+    title: ['\bcortex search\b']
+    tags: ['Cortex Search', 'CORTEX_SEARCH_RETRIEVE']
+
+  - id: semantic-views
+    name: Semantic views and Cortex Analyst
+    title: ['\bsemantic views?\b', '\bcortex analyst\b']
+
+  - id: ai-functions
+    name: Cortex AI Functions and REST API
+    title: ['\bai_[a-z_]+\b', '\bai functions?\b', '\bcortex rest api\b', '\bresponses api\b', '\bdocument processing\b', '\bsnowflake decision\b']
+    tags: ['Cortex AI Functions', 'AI Functions', 'AI_COMPLETE', 'AI_EXTRACT', 'AI_PARSE_DOCUMENT', 'Cortex REST API', 'Document Processing']
+
+  - id: ml
+    name: Snowflake ML
+    description: Feature Store, ML Jobs, Model Registry, training and fine-tuning.
+    title: ['\bfeature store\b', '\bml jobs?\b', '\bsnowflake ml\b', '\bmodel (?:registry|serving|deployment)\b', '\bcortex (?:training|fine-tuning)\b', '\bfine-tuning\b']
+    tags: ['Snowflake ML', 'Snowflake ML Jobs', 'Feature Store', 'Online Feature Store', 'Machine Learning', 'Model Training', 'Model Deployment', 'Cortex Fine-tuning', 'Cortex Training']
+
+  - id: clean-rooms
+    name: Data Clean Rooms
+    title: ['\bclean rooms?\b']
+    tags: ['Data clean rooms']
+
+  - id: postgres
+    name: Snowflake Postgres
+    title: ['\bpostgres\b']
+    tags: ['Snowflake Postgres']
+
+  - id: hybrid-tables
+    name: Hybrid tables and Unistore
+    title: ['\bhybrid tables?\b', '\bunistore\b', '\bsecondary indexes\b']
+    tags: ['Hybrid Tables', 'Hybrid tables', 'Unistore']
+
+  - id: iceberg
+    name: Apache Iceberg and open formats
+    description: Iceberg tables, Horizon Iceberg REST Catalog, Delta Direct and Parquet Direct.
+    title: ['\biceberg\b', '\bdelta direct\b', '\bparquet direct\b', '\bcatalog-linked\b']
+    tags: ['Apache Iceberg', 'Apache Iceberg tables', 'Iceberg', 'Iceberg tables', 'Iceberg REST Catalog', 'IRC', 'Delta Direct', 'Parquet Direct']
+    paths: ['user-guide/tables-iceberg']
+
+  - id: streamlit
+    name: Streamlit in Snowflake
+    title: ['\bstreamlit\b']
+    tags: ['Streamlit']
+
+  - id: native-apps
+    name: Native Apps
+    title: ['\bnative apps?\b']
+    tags: ['Native Apps']
+
+  - id: spcs
+    name: Snowpark Container Services
+    title: ['\bsnowpark container services\b', '\bspcs\b', '\bcompute pools?\b']
+    tags: ['Snowpark Container Services', 'SPCS']
+
+  - id: sharing
+    name: Sharing, listings and Marketplace
+    title: ['\bsharing\b', '\bshares?\b', '\blistings?\b', '\bmarketplace\b', '\blisting_access_history\b']
+    tags: ['Data Sharing', 'Open Data Sharing', 'Listings', 'Snowflake Marketplace', 'Agentic Marketplace Discovery']
+
+  - id: governance
+    name: Horizon governance
+    description: Tags, classification, sensitive data, policies, access history and Horizon Catalog.
+    title: ['\bhorizon\b', '\btags?\b', '\btagging\b', '\bclassification\b', '\bsensitive data\b', '\bdata protection\b', '\bmasking\b', '\brow access\b', '\baccess history\b', '\brequest access\b', '\blineage\b', '\btrust center\b']
+    tags: ['Data Governance', 'Horizon Catalog', 'Horizon Context', 'Object Tagging', 'Object tagging', 'Tags', 'Sensitive Data Classification', 'Data Protection', 'Trust Center', 'Request Access']
+
+  - id: security
+    name: Security and networking
+    title: ['\boauth\b', '\bsecrets?\b', '\bnetwork polic', '\bingress\b', '\begress\b', '\bprivatelink\b', '\btri-secret\b', '\bworkload identity\b', '\bauthentication\b', '\bmfa\b', '\bpasswords?\b', '\bfeature polic', '\bcustomer-managed key\b']
+    tags: ['Security', 'Authentication', 'Workload Identity', 'Secrets', 'Networking', 'Ingress policies', 'Egress IP', 'Tri-Secret Secure', 'TSS', 'CMK', 'Feature policies', 'Access Control']
+
+  - id: devops
+    name: dbt Projects, DCM and DevOps
+    title: ['\bdbt\b', '\bdcm projects?\b', '\bgit\b', '\bterraform\b', '\bdevops\b']
+    tags: ['DCM Projects', 'DevOps']
+
+  - id: notebooks-workspaces
+    name: Workspaces and notebooks
+    title: ['\bnotebooks?\b', '\bworkspaces?\b', '\bhtml reports?\b', '\bartifacts?\b']
+    tags: ['Workspaces', 'HTML reports', 'Artifacts']
+
+  - id: pipelines
+    name: Ingestion and pipelines
+    description: Snowpipe, file loading, COPY, dynamic tables, streams and Pipeline Builder.
+    title: ['\bsnowpipe\b', '\bfile loading\b', '\bcopy into\b', '\bcopy\s*=', '\bloading\b', '\bpipeline builder\b', '\bdynamic tables?\b', '\bstreams?\b', '\bingest']
+    tags: ['Snowpipe', 'COPY INTO', 'Dynamic Tables', 'Ingestion', 'Pipeline Builder']
+
+  - id: tasks
+    name: Tasks and task graphs
+    title: ['\btasks?\b', '\btask graphs?\b']
+    tags: ['Tasks', 'Task graphs', 'Task Graphs']
+
+  - id: snowpark
+    name: Snowpark and UDFs
+    title: ['\bsnowpark\b', '\budfs?\b', '\budtfs?\b', '\bstored procedures?\b', '\bpython\b']
+    tags: ['Python']
+
+  - id: replication
+    name: Replication, backups and recovery
+    title: ['\breplication\b', '\bfailover\b', '\bbackups?\b', '\btime travel\b', '\bsnapshots?\b', '\bclon(?:e|ing)\b']
+    tags: ['Replication', 'Failover', 'Backups', 'Clone']
+
+  - id: cost
+    name: Cost management
+    title: ['\bbudgets?\b', '\bcost\b', '\bquotas?\b', '\bbilling\b', '\bcredits?\b', '\busage history\b', '\bmy_budget']
+    tags: ['Budgets', 'budgets', 'Cost Management', 'cost management', 'AI credits', 'Per-user quotas', 'Account Usage']
+
+  - id: performance
+    name: Warehouses and performance
+    title: ['\bwarehouses?\b', '\bgen2\b', '\bquery acceleration\b', '\bsearch optimization\b', '\bclustering\b', '\bperformance\b', '\binstance families\b', '\bcompaction\b', '\brecompact']
+    tags: ['Performance', 'Search Optimization', 'Instance Families', 'data compaction']
+
+  - id: sql
+    name: SQL and data types
+    title: ['\bsql\b', '\bdata types?\b', '\bfunctions?\b', '\bvariables\b', '\bcreate or alter\b', '\bselect\b', '\bipaddress\b', '\buuid\b', '\bstructured types?\b', '\bschema evolution\b']
+    tags: ['SQL', 'DDL', 'Data Types', 'Structured types', 'Schema variables', 'Variables']
+
+  - id: snowsight
+    name: Snowsight
+    title: ['\bsnowsight\b']
+    tags: ['Snowsight']
+
+  - id: behavior-changes
+    name: Behavior changes
+    title: ['\bbehavior change', '\bbcr\b', '\b20\d\d_\d\d bundle\b']
+
+  - id: regions
+    name: Regions and compliance
+    title: ['\bregions?\b', '\bgovernment\b', '\bchina\b', '\bfedramp\b', '\bgoogle cloud\b', '\bazure\b', '\baws\b']
+    tags: ['Regions', 'Government Regions', 'China', 'FedRAMP', 'Google Cloud', 'Azure', 'AWS']

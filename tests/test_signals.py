@@ -100,7 +100,9 @@ def test_store_merge_keeps_old_records(tmp_path):
 
 def run_pipeline(tmp: Path, out: Path):
     data = tmp / "data"
-    args = ["--data", str(data), "all", "--input", f"databricks-rss={FIXTURE}", "--out", str(out)]
+    args = ["--data", str(data), "all", "--input", f"databricks-rss={FIXTURE}",
+            "--input", f"snowflake-release-notes={ROOT / 'tests' / 'fixtures' / 'snowflake-all-release-notes.html'}",
+            "--out", str(out)]
     assert main(args) == 0
     return data
 
@@ -148,3 +150,51 @@ def test_split_guards_and_ignored_links():
     assert TAX.content_links(d.links) == ["https://learn.microsoft.com/azure/databricks/discover/"]
     assert "Connect and govern any external model provider" in ups  # one-word bullets: kept whole
     assert "Control" not in ups
+
+
+SF_FIXTURE = ROOT / "tests" / "fixtures" / "snowflake-all-release-notes.html"
+SF_TAX = load_taxonomy(ROOT / "config" / "capabilities" / "snowflake.yaml")
+
+
+def collect_snowflake():
+    spec = next(c for t in load_config(ROOT) if t["id"] == "snowflake" for c in t["collectors"])
+    return [classify(SF_TAX, u) for u in build("snowflake", spec).collect(str(SF_FIXTURE))]
+
+
+def test_snowflake_entries():
+    ups = collect_snowflake()
+    t = by_title(ups)
+    assert len(ups) == len({u.id for u in ups})
+    for u in ups:
+        assert u.validate() == [], u.title
+        assert not u.title[:3].isdigit() or u.parent_title  # leading "Oct 19, 2026:" dropped
+    sv = t["Schema variables (General availability)"]
+    assert (sv.date, sv.status, sv.capability) == ("2026-10-19", "ga", "sql")
+    assert sv.url == "https://docs.snowflake.com/en/release-notes/2026/other/2026-10-19-schema-variables-ga"
+    assert "Feature Update" in sv.tags
+    assert t["Snowflake Decision with AI_COMPLETE (Private Preview)"].status == "private-preview"
+    assert t["HTML reports (Preview)"].status == "public-preview"
+    assert t["Cortex Fine-tuning: New model training no longer available in AWS US East 1"].kind == "deprecation"
+    assert not any("Upcoming" in u.parent_title or u.title.startswith("10.40") for u in ups)
+
+
+def test_snowflake_server_release_bundle_split():
+    t = by_title(collect_snowflake())
+    ip = t["IPADDRESS data type (Preview)"]
+    assert ip.parent_title.startswith("10.38 Release Notes")
+    assert ip.date == "2026-10-17" and "SQL updates" in ip.tags
+    assert ip.url.endswith("/release-notes/2026/10_38#ipaddress-data-type-preview")
+    assert not any(u.title == "Release notes change log" for u in t.values())
+
+
+def test_snowflake_digest_bullets():
+    t = by_title(collect_snowflake())
+    a = t["Artifacts (preview)"]
+    assert a.parent_title == "CoCo Desktop v1.24.0" and a.capability == "coco" and a.status == "public-preview"
+    assert "Collaboration edits are generally available" in t  # trailing colon stripped
+
+
+def test_tags_stage():
+    u = classify(SF_TAX, Update("snowflake", "t", "x", "2026-01-01", "Version 4.1.0", "https://x",
+                                tags=["Client/Driver/Library Release"]))
+    assert u.capability == "drivers"

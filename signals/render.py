@@ -42,11 +42,12 @@ def esc(text: str) -> str:
     """Make text safe inside a markdown table cell."""
     text = " ".join((text or "").split())
     return (text.replace("\\", "\\\\").replace("|", "\\|")
-            .replace("<", "&lt;").replace(">", "&gt;"))
+            .replace("<", "&lt;").replace(">", "&gt;")
+            .replace("[", "\\[").replace("]", "\\]"))
 
 
 def esc_link_text(text: str) -> str:
-    return esc(text).replace("[", "\\[").replace("]", "\\]")
+    return esc(text)
 
 
 def badge(label_map: dict, key: str) -> str:

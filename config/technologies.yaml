@@ -14,8 +14,14 @@ technologies:
         no_split_title: '\(beta\)|\bin beta\b|public preview|private preview|generally available|\bga\b|\bupcoming\b|behavior change'
         no_split_bullet: '\b20\d\d\b'
 
-  # - id: snowflake
-  #   name: Snowflake
-  #   collectors:
-  #     - id: snowflake-release-notes
-  #       type: ...   # add a collector under signals/collectors/ if the source is not RSS
+  - id: snowflake
+    name: Snowflake
+    collectors:
+      # No RSS feed. The page embeds its entries as JSON (__NEXT_DATA__).
+      # Query params widen the page's default filter (server and feature updates, last 30 days).
+      - id: snowflake-release-notes
+        type: snowflake-release-notes
+        url: https://docs.snowflake.com/en/release-notes/all-release-notes?changeType=all&datePreset=all
+        split_digest: true
+        no_split_title: '\(general availability\)|\(preview\)|\(public preview\)|\(private preview\)|generally available|behavior change'
+        no_split_bullet: '\b20\d\d\b'
