@@ -2,6 +2,8 @@ name: signals
 
 # Daily: collect from every source, classify, commit data/, render, build, deploy to GitHub Pages.
 # Deterministic: no model, sorted output, no run timestamps.
+# Pushes that touch only data/ or markdown do not start a run. To rebuild a store after
+# deleting data/<tech>/updates.jsonl, run this workflow by hand (Actions > signals > Run workflow).
 
 on:
   schedule:
