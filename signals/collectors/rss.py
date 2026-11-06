@@ -12,6 +12,11 @@ Params (from technologies.yaml):
   link_base      base URL for relative links in descriptions, default: the item link
   title_include  optional regex; keep only items whose title matches
   title_exclude  optional regex; drop items whose title matches
+  no_split_title optional regex; never split items whose title matches, e.g. one
+                 announcement with a status ("... (Beta)") that lists its parts as bullets
+  no_split_bullet optional regex; never split an item if any bullet title matches,
+                 e.g. timeline bullets that are dates
+  split_min_words bullets need at least this many words in their title to split, default 2
 """
 
 from __future__ import annotations
@@ -82,7 +87,8 @@ def links_in(html: str, base: str) -> list[str]:
 class RssCollector:
     def __init__(self, technology: str, id: str, url: str, split_digest: bool = False,
                  link_base: str | None = None, title_include: str | None = None,
-                 title_exclude: str | None = None):
+                 title_exclude: str | None = None, no_split_title: str | None = None,
+                 no_split_bullet: str | None = None, split_min_words: int = 2):
         self.technology = technology
         self.id = id
         self.url = url
@@ -90,6 +96,9 @@ class RssCollector:
         self.link_base = link_base
         self.include = re.compile(title_include, re.I) if title_include else None
         self.exclude = re.compile(title_exclude, re.I) if title_exclude else None
+        self.no_split_title = re.compile(no_split_title, re.I) if no_split_title else None
+        self.no_split_bullet = re.compile(no_split_bullet, re.I) if no_split_bullet else None
+        self.split_min_words = split_min_words
 
     def collect(self, input_path: str | None = None) -> list[Update]:
         xml = Path(input_path).read_text(encoding="utf-8") if input_path else fetch(self.url)
@@ -117,12 +126,7 @@ class RssCollector:
             tags = sorted({" ".join((c.text or "").split()) for c in item.findall("category") if c.text})
             url = link or guid
 
-            parts = []
-            if self.split_digest:
-                for li in LI_RE.findall(desc):
-                    m = DIGEST_LI_RE.match(li)
-                    if m:
-                        parts.append((text_of(m.group(2)), m.group(3), li))
+            parts = self.digest_parts(title, desc)
             if parts:
                 for sub_title, body, li in parts:
                     out.append(Update(
@@ -138,3 +142,19 @@ class RssCollector:
                     links=links_in(desc, base), tags=tags,
                 ))
         return out
+
+    def digest_parts(self, title: str, desc: str) -> list[tuple[str, str, str]]:
+        """(bullet title, bullet body html, bullet html) per digest bullet, or [] to keep the item whole."""
+        if not self.split_digest or (self.no_split_title and self.no_split_title.search(title)):
+            return []
+        parts = []
+        for li in LI_RE.findall(desc):
+            m = DIGEST_LI_RE.match(li)
+            if m:
+                parts.append((text_of(m.group(2)), m.group(3), li))
+        for sub_title, _, _ in parts:
+            if len(sub_title.split()) < self.split_min_words:
+                return []
+            if self.no_split_bullet and self.no_split_bullet.search(sub_title):
+                return []
+        return parts

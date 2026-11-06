@@ -7,7 +7,7 @@ Capability, first match wins, stages in this order:
   2. parent_title (digest title) against each capability's `title` regexes.
   3. title against each capability's `title` regexes.
   4. each link, in order, turned into a docs path by `doc_path_pattern`,
-     against each capability's `paths` prefixes.
+     against each capability's `paths` prefixes. Links under `ignore_link_paths` are skipped.
   5. the taxonomy's `default_capability`.
 Within a stage, capabilities are tried in file order. Put specific ones first.
 
@@ -63,9 +63,20 @@ class Taxonomy:
     name: str
     default_capability: str
     doc_path_pattern: re.Pattern | None
+    ignore_link_paths: list[str]
     capabilities: list[Capability]
     status_rules: list[tuple[str, re.Pattern]]
     kind_rules: list[tuple[str, re.Pattern]]
+
+    def content_links(self, links: list[str]) -> list[str]:
+        """Links minus the ones that point at boilerplate pages (release types, previews page)."""
+        out = []
+        for link in links:
+            p = doc_path(self, link)
+            if p is not None and any(p == pre.strip("/") or p.startswith(pre) for pre in self.ignore_link_paths):
+                continue
+            out.append(link)
+        return out
 
     def get(self, cap_id: str) -> Capability | None:
         return next((c for c in self.capabilities if c.id == cap_id), None)
@@ -102,6 +113,7 @@ def load_taxonomy(path: Path) -> Taxonomy:
         technology=raw["technology"], name=raw.get("name", raw["technology"]),
         default_capability=default,
         doc_path_pattern=re.compile(pattern, re.I) if pattern else None,
+        ignore_link_paths=list(raw.get("ignore_link_paths", [])),
         capabilities=caps,
         status_rules=_rules(raw.get("status_rules", DEFAULT_STATUS_RULES), STATUSES),
         kind_rules=_rules(raw.get("kind_rules", DEFAULT_KIND_RULES), KINDS),
@@ -128,7 +140,7 @@ def capability_for(tax: Taxonomy, u: Update) -> str:
         for c in tax.capabilities:
             if any(rx.search(text) for rx in c.title):
                 return c.id
-    for link in u.links:
+    for link in tax.content_links(u.links):
         p = doc_path(tax, link)
         if p is None:
             continue

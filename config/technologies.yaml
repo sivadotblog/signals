@@ -10,6 +10,9 @@ technologies:
         type: rss
         url: https://learn.microsoft.com/en-us/azure/databricks/feed.xml
         split_digest: true
+        # One announcement with a status or a timeline lists its parts as bullets. Keep it whole.
+        no_split_title: '\(beta\)|\bin beta\b|public preview|private preview|generally available|\bga\b|\bupcoming\b|behavior change'
+        no_split_bullet: '\b20\d\d\b'
 
   # - id: snowflake
   #   name: Snowflake

@@ -57,5 +57,22 @@
       <pubDate>Mon, 19 Oct 2026 00:00:00 Z</pubDate>
       <description>&lt;p&gt;No links.&lt;/p&gt;</description>
     </item>
+    <item>
+      <title>Discover page and domains (Beta)</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/february#discover</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/february#discover</guid>
+      <pubDate>Wed, 18 Feb 2026 00:00:00 Z</pubDate>
+      <description>&lt;p&gt;The Discover page is in &lt;a href="/azure/databricks/release-notes/release-types"&gt;Beta&lt;/a&gt;.&lt;/p&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Unified discovery&lt;/strong&gt;: Find assets. See &lt;a href="/azure/databricks/discover/"&gt;Discover&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Domains&lt;/strong&gt;: Group assets.&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>Connect and govern any external model provider</title>
+      <link>https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/july#external-models</link>
+      <guid isPermaLink="true">https://learn.microsoft.com/en-us/azure/databricks/release-notes/product/2026/july#external-models</guid>
+      <pubDate>Fri, 17 Jul 2026 00:00:00 Z</pubDate>
+      <description>&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Control&lt;/strong&gt;: one.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Choice&lt;/strong&gt;: two.&lt;/li&gt;&lt;/ul&gt;</description>
+    </item>
   </channel>
 </rss>

@@ -6,7 +6,7 @@ import pytest
 
 from signals import store
 from signals.classify import load_taxonomy, classify
-from signals.cli import main
+from signals.cli import load_config, main
 from signals.collectors import build
 from signals.model import Update
 
@@ -16,7 +16,8 @@ TAX = load_taxonomy(ROOT / "config" / "capabilities" / "databricks.yaml")
 
 
 def collect_fixture():
-    col = build("databricks", {"id": "databricks-rss", "type": "rss", "url": "unused", "split_digest": True})
+    spec = next(c for t in load_config(ROOT) if t["id"] == "databricks" for c in t["collectors"])
+    col = build("databricks", spec)
     return [classify(TAX, u) for u in col.collect(str(FIXTURE))]
 
 
@@ -137,3 +138,13 @@ def test_no_product_names_in_core():
     for p in (ROOT / "signals").rglob("*.py"):
         text = p.read_text().lower()
         assert "lakebase" not in text, p
+
+
+def test_split_guards_and_ignored_links():
+    ups = by_title(collect_fixture())
+    d = ups["Discover page and domains (Beta)"]  # status in title: kept whole
+    assert d.parent_title == "" and d.status == "beta"
+    assert d.capability == "unity-catalog"  # release-types link skipped, discover/ link used
+    assert TAX.content_links(d.links) == ["https://learn.microsoft.com/azure/databricks/discover/"]
+    assert "Connect and govern any external model provider" in ups  # one-word bullets: kept whole
+    assert "Control" not in ups

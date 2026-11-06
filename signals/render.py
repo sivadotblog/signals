@@ -73,12 +73,12 @@ def update_cell(u: Update) -> str:
     return cell
 
 
-def docs_cell(u: Update) -> str:
-    links = [link for link in u.links if link.split("#")[0] != u.url.split("#")[0]]
+def docs_cell(u: Update, tax: Taxonomy) -> str:
+    links = [link for link in tax.content_links(u.links) if link.split("#")[0] != u.url.split("#")[0]]
     return f"[docs]({links[0]})" if links else ""
 
 
-def table(updates: list[Update], tax: Taxonomy | None = None, with_capability: bool = False) -> str:
+def table(updates: list[Update], tax: Taxonomy, with_capability: bool = False) -> str:
     head = ["Date"] + (["Capability"] if with_capability else []) + ["Update", "Status", "Type", "Docs"]
     rows = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
     for u in updates:
@@ -86,7 +86,7 @@ def table(updates: list[Update], tax: Taxonomy | None = None, with_capability: b
         if with_capability:
             cap = tax.get(u.capability)
             cells.append(f"[{esc_link_text(cap.name)}](./{cap.id}.md)" if cap else esc(u.capability))
-        cells += [update_cell(u), badge(STATUS_LABEL, u.status), badge(KIND_LABEL, u.kind), docs_cell(u)]
+        cells += [update_cell(u), badge(STATUS_LABEL, u.status), badge(KIND_LABEL, u.kind), docs_cell(u, tax)]
         rows.append("| " + " | ".join(cells) + " |")
     return "\n".join(rows) + "\n"
 
@@ -146,7 +146,7 @@ def render_technology(out: Path, tax: Taxonomy, updates: dict[str, Update], posi
         if c.description:
             body.append(f"{c.description}\n")
         body.append(f"{len(us)} updates. Latest {us[0].date}." + (f" {counts}." if counts else "") + "\n")
-        body.append(table(us))
+        body.append(table(us, tax))
         (tdir / f"{c.id}.md").write_text("\n".join(body), encoding="utf-8")
 
     return {"technology": tax.technology, "name": tax.name, "updates": len(items),
