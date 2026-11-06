@@ -111,7 +111,8 @@ def cap_order(tax: Taxonomy) -> list:
     return caps + ([other] if other else [])
 
 
-def render_technology(out: Path, tax: Taxonomy, updates: dict[str, Update], position: int) -> dict:
+def render_technology(out: Path, tax: Taxonomy, updates: dict[str, Update], position: int,
+                      health: dict | None = None) -> dict:
     tdir = out / tax.technology
     if tdir.exists():
         shutil.rmtree(tdir)
@@ -142,6 +143,15 @@ def render_technology(out: Path, tax: Taxonomy, updates: dict[str, Update], posi
                      f"| {st['ga']} | {st['public-preview']} | {st['beta']} |")
     lines += ["", f"## Latest {min(LATEST_N, len(items))} updates\n",
               table(items[:LATEST_N], tax, with_capability=True)]
+    if health:
+        lines += ["## Sources\n", "Items each source returned on the last run.\n",
+                  "| Source | Items | Status |", "|---|---|---|"]
+        for cid, h in sorted(health.items()):
+            status = (f"Failed: {esc(h['error'])}" if h.get("error")
+                      else "No items: page layout may have changed" if not h.get("items") else "OK")
+            src = f"[{esc_link_text(cid)}]({h['url']})" if h.get("url") else esc(cid)
+            lines.append(f"| {src} | {h.get('items', 0)} | {status} |")
+        lines.append("")
     (tdir / "index.md").write_text("\n".join(lines), encoding="utf-8")
 
     for pos, c in enumerate(caps, start=1):

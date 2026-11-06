@@ -27,6 +27,8 @@ Params (from technologies.yaml):
   release_level    heading level of releases, default 3
   label_prefix     regex with one group for the label, default the common status words
   capability_hint  set on every record, for product-specific changelogs
+  capability_fallback  set on every record; used only when no rule matches
+  strip_md_links   turn same-site links to .md files into page links, default true
 """
 
 from __future__ import annotations
@@ -80,7 +82,8 @@ def plain(md: str) -> str:
 @register("markdown-changelog")
 class MarkdownChangelog:
     def __init__(self, technology: str, id: str, url: str, page_url: str | None = None,
-                 release_level: int = 3, label_prefix: str = DEFAULT_LABEL, capability_hint: str = ""):
+                 release_level: int = 3, label_prefix: str = DEFAULT_LABEL, capability_hint: str = "",
+                 capability_fallback: str = "", strip_md_links: bool = True):
         self.technology = technology
         self.id = id
         self.url = url
@@ -90,6 +93,16 @@ class MarkdownChangelog:
         self.release_prefix = "#" * release_level + " "
         self.label_rx = re.compile(label_prefix, re.I)
         self.hint = capability_hint
+        self.fallback = capability_fallback
+        self.strip_md = strip_md_links
+        self.host = urlparse(self.page_url).netloc
+
+    def page_link(self, u: str) -> str:
+        """Markdown copies link to other .md copies. Point them at the HTML page instead."""
+        p = urlparse(u)
+        if self.strip_md and p.netloc == self.host and p.path.endswith(".md"):
+            u = p._replace(path=p.path[:-3] + "/").geturl()
+        return u
 
     def collect(self, input_path: str | None = None) -> list[Update]:
         md = Path(input_path).read_text(encoding="utf-8") if input_path else fetch(self.url)
@@ -146,7 +159,7 @@ class MarkdownChangelog:
                 text = text[m.end():].strip()
             links = []
             for _, href in MD_LINK.findall(body):
-                u = urljoin(self.page_url, href)
+                u = self.page_link(urljoin(self.page_url, href))
                 if u.startswith("http") and u not in links:
                     links.append(u)
             key = ""
@@ -160,6 +173,6 @@ class MarkdownChangelog:
             out.append(Update(
                 technology=self.technology, source=self.id, source_id=sid, date=date,
                 date_precision=precision, title=text, url=f"{self.page_url}#{anchor}",
-                links=links, label=label, capability_hint=self.hint,
+                links=links, label=label, capability_hint=self.hint, capability_fallback=self.fallback,
             ))
         return out

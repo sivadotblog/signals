@@ -53,3 +53,16 @@ def save(data_dir: Path, technology: str, updates: dict[str, Update]) -> Path:
     lines = [json.dumps(u.to_dict(), ensure_ascii=False, sort_keys=True) for u in ordered(updates)]
     p.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
     return p
+
+
+def save_health(data_dir: Path, technology: str, health: dict) -> Path:
+    """Per-collector item count and last error from the latest live run."""
+    p = data_dir / technology / "sources.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(health, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return p
+
+
+def load_health(data_dir: Path, technology: str) -> dict:
+    p = data_dir / technology / "sources.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}

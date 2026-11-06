@@ -63,6 +63,7 @@ def cmd_collect(args, root: Path, data: Path) -> None:
     for t in pick(load_config(root), args.tech):
         tax = taxonomy(root, t["id"])
         ups = store.load(data, t["id"])
+        health: dict[str, dict] = {}
         for spec in t.get("collectors", []):
             col = collectors.build(t["id"], spec)
             if inputs and col.id not in inputs:
@@ -73,6 +74,7 @@ def cmd_collect(args, root: Path, data: Path) -> None:
                 # One broken source must not block the others. The store keeps its old records.
                 msg = {"technology": t["id"], "collector": col.id, "error": str(e)[:300]}
                 print(json.dumps(msg), file=sys.stderr)
+                health[col.id] = {"url": getattr(col, "url", ""), "items": 0, "error": str(e)[:300]}
                 if args.strict:
                     raise
                 continue
@@ -83,9 +85,12 @@ def cmd_collect(args, root: Path, data: Path) -> None:
             if bad:
                 raise SystemExit(f"{col.id}: {len(bad)} invalid records, first: {bad[0][0].title!r}: {bad[0][1]}")
             ups, added, changed = store.merge(ups, new)
+            health[col.id] = {"url": getattr(col, "url", ""), "items": len(new), "error": ""}
             print(json.dumps({"technology": t["id"], "collector": col.id, "items": len(new),
                               "added": added, "changed": changed}))
         store.save(data, t["id"], ups)
+        if not inputs:  # offline runs do not overwrite source health
+            store.save_health(data, t["id"], health)
         reclassify(root, data, t["id"])
 
 
@@ -101,7 +106,8 @@ def cmd_render(args, root: Path, data: Path) -> None:
     summaries = []
     for pos, t in enumerate(load_config(root), start=1):
         tax = taxonomy(root, t["id"])
-        summaries.append(render_technology(out, tax, store.load(data, t["id"]), pos))
+        summaries.append(render_technology(out, tax, store.load(data, t["id"]), pos,
+                                           store.load_health(data, t["id"])))
     render_home(out, summaries)
     print(json.dumps({"rendered": [s["technology"] for s in summaries], "out": str(out)}))
 

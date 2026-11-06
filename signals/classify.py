@@ -11,7 +11,8 @@ Capability, first match wins. Stages run in the taxonomy's `match_order`, defaul
   links         each link, in order, turned into a docs path by `doc_path_pattern`,
                 against each capability's `paths` prefixes. Links under
                 `ignore_link_paths` are skipped.
-Then the taxonomy's `default_capability`.
+Then the record's `capability_fallback` (set by a collector whose source covers one
+area, e.g. a search changelog), then the taxonomy's `default_capability`.
 Within a stage, capabilities are tried in file order. Put specific ones first.
 
 Status and kind are set only from words the vendor wrote as a label. They are
@@ -185,6 +186,8 @@ def capability_for(tax: Taxonomy, u: Update) -> str:
             found = _by_links(tax, u.links)
         if found:
             return found
+    if u.capability_fallback and tax.get(u.capability_fallback):
+        return u.capability_fallback
     return tax.default_capability
 
 

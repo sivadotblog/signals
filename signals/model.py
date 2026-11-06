@@ -31,6 +31,7 @@ class Update:
     tags: list[str] = field(default_factory=list)  # source categories, if any
     parent_title: str = ""  # digest title when one source item was split into several updates
     capability_hint: str = ""  # set only when the source itself is product-specific
+    capability_fallback: str = ""  # used instead of default_capability when no rule matches
     label: str = ""  # status label the source states in its structure, e.g. a "Public Preview:" prefix
     date_precision: str = "day"  # "day", or "month" when the source gives only month and year
 

@@ -27,7 +27,7 @@ status_rules:
 
 # Type only from explicit words. "Removes" alone is not a retirement.
 kind_rules:
-  - {value: retirement, match: '\bdecommission|\bis (?:now )?retired\b'}
+  - {value: retirement, match: '\bdecomm?ission|\bis (?:now )?retired\b'}  # MongoDB writes "Decomissions" too
   - {value: deprecation, match: '\bdeprecat|\bend of life\b|\bend-of-life\b|\bstops? support\b|\bno longer supported\b'}
   - {value: coming-soon, match: '\bwill soon\b|\bcoming soon\b'}
 
@@ -38,14 +38,14 @@ capabilities:
     paths: ['atlas/atlas-stream-processing/']
 
   - id: vector-search
-    name: Vector Search and reranking
-    title: ['\bvector search\b', '\$rerank\b', '\bre-?rank', '\bsemantic\b', '\bembeddings?\b', '\bvoyage ai\b', '\$vectorsearch\b']
-    paths: ['atlas/atlas-vector-search/', 'voyageai/']
+    name: Vector Search, reranking and AI
+    title: ['\bvector search\b', '\$rerank\b', '\bre-?rank', '\bsemantic\b', '\bembeddings?\b', '\bvoyage ai\b', '\$vectorsearch\b', '\bvectors?\b', '\bquantization\b', '\bnearest neighbor', '\$similarity', '\bai agents?\b', '\bagent skills\b']
+    paths: ['atlas/atlas-vector-search/', 'voyageai/', 'vector-search/']
 
   - id: search
     name: Atlas Search
-    title: ['\batlas search\b', '\bmongodb search\b', '\bfull-text search\b', '\$search\b', '\bsearch ind']
-    paths: ['atlas/atlas-search/']
+    title: ['\batlas search\b', '\bmongodb search\b', '\bfull-text search\b', '\$search\b', '\bsearch ind', '\bsearch query\b', '\bfacets?\b', '\bfaceting\b', '\btoken filters?\b', '\bstemm', '\banaly[sz]ers?\b', '\bsynonyms?\b', '\bhighlight', '\breturnscope\b', '\bstoredsource\b', '\btypesets?\b']
+    paths: ['atlas/atlas-search/', 'search/']
 
   - id: data-federation
     name: Data Federation and Online Archive
@@ -79,7 +79,7 @@ capabilities:
 
   - id: observability
     name: Monitoring, logs and observability
-    title: ['\bdatadog\b', '\bmetrics?\b', '\bobservability\b', '\bopentelemetry\b', '\blogs?\b', '\balerts?\b', '\bactivity feed\b', '\bquery (?:shape|profiler|insights)\b', '\bperformance advisor\b', '\bprometheus\b', '\bsplunk\b']
+    title: ['\bdatadog\b', '\bmetrics?\b', '\bobservability\b', '\bopentelemetry\b', '\blogs?\b', '\balerts?\b', '\bactivity feed\b', '\bquery (?:shape|profiler|insights)\b', '\bperformance advisor\b', '\bprometheus\b', '\bsplunk\b', '\bslow quer', '\bperformance panel\b', '\bintegrations\b', '\bfree monitoring\b']
     paths: ['atlas/monitoring', 'atlas/tutorial/third-party-service-integrations', 'atlas/query-shape-insights', 'atlas/push-logs', 'atlas/export-logs']
 
   - id: backup
@@ -89,7 +89,7 @@ capabilities:
 
   - id: security
     name: Security and access
-    title: ['\bldap\b', '\boidc\b', '\bsaml\b', '\bx\.509\b', '\biam\b', '\bencryption\b', '\bauthentication\b', '\bauthorization\b', '\bfederated users?\b', '\bfederation\b', '\bservice accounts?\b', '\broles?\b', '\bauditing\b']
+    title: ['\bencrypted storage\b', '\bkeyvault\b', '\bemployee access\b', '\bprivilege', '\bpasswords?\b', '\brecaptcha\b', '\bsecurity contact\b', '\bldap\b', '\boidc\b', '\bsaml\b', '\bx\.509\b', '\biam\b', '\bencryption\b', '\bauthentication\b', '\bauthorization\b', '\bfederated users?\b', '\bfederation\b', '\bservice accounts?\b', '\broles?\b', '\bauditing\b']
     paths: ['atlas/security', 'atlas/access/', 'atlas/invitations']
 
   - id: networking
@@ -98,14 +98,14 @@ capabilities:
     paths: ['atlas/security-private-endpoint', 'atlas/security-vpc-peering']
 
   - id: data-explorer
-    name: Atlas UI and Data Explorer
-    title: ['\bdata explorer\b', '\batlas ui\b', '\bcompass\b', '\bshell syntax\b']
+    name: Atlas UI, accounts and support
+    title: ['\bdata explorer\b', '\batlas ui\b', '\bcompass\b', '\bshell syntax\b', '\blog ?in\b', '\bsign in\b', '\bnavigation\b', '\bsupport (?:package|plan)', '\bpro support\b', '\bregistrations?\b', '\bemail verification\b', '\bgoto\b', '\bmongodb shell\b', '\bmongocli\b', '\bcli\b', '\btemplates?\b']
     paths: ['atlas/atlas-ui/', 'compass/']
 
   - id: clusters
     name: Clusters, tiers and scaling
-    title: ['\bclusters?\b', '\bflex\b', '\bdedicated\b', '\bgen2\b', '\bauto-?scaling\b', '\bsharded\b', '\bnodes?\b', '\bmongodb \d', '\bworkload management\b', '\binitial sync\b']
-    paths: ['atlas/manage-clusters', 'atlas/cluster-', 'atlas/intelligent-workload-management/']
+    title: ['\bclusters?\b', '\bflex\b', '\bdedicated\b', '\bgen2\b', '\bauto-?scaling\b', '\bsharded\b', '\bnodes?\b', '\bmongodb \d', '\bworkload management\b', '\binitial sync\b', '\bmigrat', '\boutage simulation', '\bregional outage\b', '\bresilience\b', '\bmaintenance\b', '\bnvme\b', '\btime series\b', '\bserverless\b', '\bupgrades?\b']
+    paths: ['atlas/manage-clusters', 'atlas/cluster-', 'atlas/intelligent-workload-management/', 'atlas/import/']
 
   - id: regions
     name: Regions and clouds
@@ -114,5 +114,5 @@ capabilities:
 
   - id: billing
     name: Billing and organizations
-    title: ['\bbilling\b', '\binvoices?\b', '\bcosts?\b', '\borganizations?\b', '\bprojects?\b']
+    title: ['\bcredit cards?\b', '\bbilling\b', '\binvoices?\b', '\bcosts?\b', '\borganizations?\b', '\bprojects?\b']
     paths: ['atlas/billing']

@@ -44,6 +44,7 @@ technologies:
         type: markdown-changelog
         url: https://www.mongodb.com/docs/atlas/search-changelog.md
         page_url: https://www.mongodb.com/docs/atlas/search-changelog/
+        capability_fallback: search  # covers Search and Vector Search; rules pick vector items out
       - id: mongodb-charts-changelog
         type: markdown-changelog
         url: https://www.mongodb.com/docs/charts/release-notes.md
