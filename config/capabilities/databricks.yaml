@@ -16,7 +16,7 @@ doc_path_pattern: '^https://learn\.microsoft\.com/(?:[a-z]{2}-[a-z]{2}/)?azure/d
 
 # Links to these pages are boilerplate (status word links, previews page). They are not
 # used for capability matching or for the Docs column.
-ignore_link_paths: ['release-notes/', 'admin/workspace-settings/manage-previews']
+ignore_link_paths: ['release-notes/release-types', 'admin/workspace-settings/manage-previews']
 
 capabilities:
   - id: lakebase
