@@ -1,0 +1,22 @@
+{
+  "mongodb-atlas-changelog": {
+    "error": "",
+    "items": 502,
+    "url": "https://www.mongodb.com/docs/atlas/release-notes/changelog.md"
+  },
+  "mongodb-charts-changelog": {
+    "error": "",
+    "items": 0,
+    "url": "https://www.mongodb.com/docs/charts/release-notes.md"
+  },
+  "mongodb-search-changelog": {
+    "error": "",
+    "items": 170,
+    "url": "https://www.mongodb.com/docs/atlas/search-changelog.md"
+  },
+  "mongodb-stream-processing-changelog": {
+    "error": "",
+    "items": 119,
+    "url": "https://www.mongodb.com/docs/atlas/atlas-stream-processing/changelog.md"
+  }
+}
