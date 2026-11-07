@@ -54,6 +54,12 @@ capabilities:
     title: ['\bcolumnar\b', '\biceberg\b', '\bbigquery\b', '\banalytical\b', '\blakehouse\b']
     paths: ['columnar-engine', 'access-iceberg', 'sync-bigquery']
 
+  - id: integrations
+    name: Integrations and external search
+    description: Knowledge Catalog, Dataplex, Elasticsearch and other external sources.
+    title: ['\bknowledge catalog\b', '\bdataplex\b', '\belasticsearch\b', '\bexternal search\b', '\bfederat']
+    paths: ['external-search', 'knowledge-catalog', 'dataplex']
+
   - id: query-insights
     name: Query Insights and performance
     title: ['\bquery insights\b', '\bindex advisor\b', '\bdatabase advisor\b', '\bperformance snapshot', '\bquery plans?\b', '\btune sql\b', '\bquery tuning\b']
@@ -88,7 +94,7 @@ capabilities:
 
   - id: networking
     name: Networking and connectivity
-    title: ['\bprivate service connect\b', '\bpsc\b', '\bpublic ip\b', '\bprivate ip\b', '\bauth proxy\b', '\bconnectors?\b', '\bconnectivity\b', '\bnetwork']
+    title: ['\bwrite endpoints?\b', '\bprivate service connect\b', '\bpsc\b', '\bpublic ip\b', '\bprivate ip\b', '\bauth proxy\b', '\bconnectors?\b', '\bconnectivity\b', '\bnetwork']
     paths: ['configure-connectivity', 'about-private-service-connect', 'connect-', 'auth-proxy', 'language-connectors']
 
   - id: versions-maintenance
