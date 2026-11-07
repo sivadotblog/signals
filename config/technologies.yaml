@@ -76,3 +76,24 @@ technologies:
         url: https://docs.cloud.google.com/feeds/alloydb-release-notes.xml
         split_heading: h3
         label_link: 'product-launch-stages'
+
+  - id: azure-managed-redis
+    name: Azure Managed Redis
+    # Learn "What's new" page through the Learn MCP endpoint. Each change is a ### heading
+    # under a ## Month YYYY heading.
+    collectors:
+      - id: azure-managed-redis-whats-new
+        type: learn-page
+        url: https://learn.microsoft.com/en-us/azure/redis/whats-new
+        release_level: 2
+        item_level: 3
+
+  - id: memorystore-valkey
+    name: Memorystore for Valkey
+    # Google Cloud Atom feed, same format as AlloyDB.
+    collectors:
+      - id: memorystore-valkey-release-notes
+        type: rss
+        url: https://docs.cloud.google.com/feeds/memorystorevalkey-release-notes.xml
+        split_heading: h3
+        label_link: 'product-launch-stages'

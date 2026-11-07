@@ -1,0 +1,73 @@
+# Memorystore for Valkey capability taxonomy. Same shape as AlloyDB (Google Cloud Atom feed).
+# Status from the launch-stage link text; type from the vendor's type heading.
+# Check the "Other" page after changes:
+#   python -m signals report --tech memorystore-valkey
+
+technology: memorystore-valkey
+name: Memorystore for Valkey
+default_capability: other
+
+doc_path_pattern: '^https://(?:docs\.)?cloud\.google\.com/memorystore/docs/valkey/([^?#]*)'
+ignore_link_paths: ['release-notes']
+match_order: [hint, tags, parent_title, title, links]
+
+status_rules:
+  - {value: ga, match: '^ga$|\bgenerally available\b|\(ga\)'}
+  - {value: private-preview, match: '\bprivate preview\b'}
+  - {value: public-preview, match: '^(?:in )?preview$|\bpublic preview\b|\(preview\)'}
+
+kind_tags:
+  Deprecated: deprecation
+
+kind_rules:
+  - {value: retirement, match: '\b(?:is|are|has been) (?:now )?(?:retired|shut down)\b'}
+  - {value: deprecation, match: '\bdeprecat|\bend of (?:life|support)\b|\bno longer supported\b'}
+  - {value: coming-soon, match: '\bwill soon\b|\bcoming soon\b'}
+
+capabilities:
+  - id: versions
+    name: Valkey versions and upgrades
+    title: ['\bvalkey \d', '\bversions?\b', '\bupgrade', '\bmaintenance\b']
+    paths: ['supported-versions', 'about-maintenance', 'upgrade']
+
+  - id: ai-vector
+    name: Vector search and AI
+    title: ['\bvector\b', '\bsearch\b', '\bembeddings?\b', '\bai\b', '\bagents?\b', '\bmcp\b', '\bapplication design center\b']
+    paths: ['about-vector-search', 'vector-search']
+
+  - id: replication-ha
+    name: Replication, HA and DR
+    title: ['\bcross-region\b', '\breplication\b', '\breplicas?\b', '\bfailover\b', '\bswitchover\b', '\bzones?\b', '\bhigh availability\b']
+    paths: ['about-cross-region-replication', 'ha-and-replicas', 'cross-region']
+
+  - id: persistence-backup
+    name: Persistence and backups
+    title: ['\bpersistence\b', '\brdb\b', '\baof\b', '\bbackups?\b', '\brestore\b', '\bimport\b', '\bexport\b']
+    paths: ['about-persistence', 'about-backup', 'backups', 'import']
+
+  - id: security
+    name: Security and access
+    title: ['\biam\b', '\bcmek\b', '\bencryption\b', '\btls\b', '\bin-transit\b', '\bauthentication\b', '\bsecurity\b', '\bvpc service controls\b', '\baudit']
+    tags: ['Security']
+    paths: ['about-iam-auth', 'cmek', 'about-in-transit-encryption', 'security']
+
+  - id: networking
+    name: Networking and connectivity
+    title: ['\bprivate service connect\b', '\bpsc\b', '\bnetwork', '\bendpoints?\b', '\bclients?\b', '\bconnect']
+    paths: ['networking', 'about-psc', 'connect-', 'client-library']
+
+  - id: monitoring
+    name: Monitoring and logging
+    title: ['\bmetrics?\b', '\bmonitoring\b', '\blogs?\b', '\blogging\b', '\bdashboards?\b', '\balerts?\b', '\bslowlog\b']
+    paths: ['monitor', 'logging', 'cloud-monitoring']
+
+  - id: instances
+    name: Instances, scaling and pricing
+    description: Node types, shards, cluster mode, scaling, regions, committed use discounts.
+    title: ['\binstances?\b', '\bnode types?\b', '\bshards?\b', '\bcluster mode\b', '\bclusters?\b', '\bscal(?:e|ing)\b', '\bregions?\b', '\bpricing\b', '\bcommitted use\b', '\bfree\b']
+    paths: ['instance', 'scale', 'locations', 'pricing', 'cluster-mode', 'node-specification']
+
+  - id: features
+    name: Valkey features and modules
+    title: ['\bmodules?\b', '\bjson\b', '\bbloom\b', '\bcommands?\b', '\blua\b', '\bscripts?\b', '\bconfigurations?\b', '\bparameters?\b']
+    paths: ['supported-commands', 'supported-instance-configurations', 'about-modules']

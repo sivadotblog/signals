@@ -40,6 +40,10 @@ Params (from technologies.yaml):
   heading_strip    regex removed from a heading before reading its date, e.g. '^Release:\\s*'
   group_label      regex; a top-level bullet that fully matches it is a status group
   strip_text       regex removed from every title, e.g. footnote markers
+  item_level       heading level of items, for pages where each change is a heading
+                   under the release heading (## May 2026 / ### Feature title / text).
+                   The item heading is the title and the text under it the summary.
+                   A release with no item headings uses its bullets as rows.
   page_url_slash   add a trailing slash to page_url when it has none, default true.
                    Turn off for sites whose pages have no trailing slash, so relative
                    links resolve against the page's folder.
@@ -101,7 +105,8 @@ class MarkdownChangelog:
     def __init__(self, technology: str, id: str, url: str, page_url: str | None = None,
                  release_level: int = 3, label_prefix: str = DEFAULT_LABEL, capability_hint: str = "",
                  capability_fallback: str = "", strip_md_links: bool = True, heading_strip: str | None = None,
-                 group_label: str | None = None, strip_text: str | None = None, page_url_slash: bool = True):
+                 group_label: str | None = None, strip_text: str | None = None, page_url_slash: bool = True,
+                 item_level: int | None = None):
         self.technology = technology
         self.id = id
         self.url = url
@@ -117,6 +122,7 @@ class MarkdownChangelog:
         self.heading_strip = re.compile(heading_strip, re.I) if heading_strip else None
         self.group_label = re.compile(group_label, re.I) if group_label else None
         self.strip_text = re.compile(strip_text) if strip_text else None
+        self.item_level = item_level
 
     def page_link(self, u: str) -> str:
         """Markdown copies link to other .md copies. Point them at the HTML page instead."""
@@ -191,7 +197,40 @@ class MarkdownChangelog:
                 out[-1].append(ln)
         return ["\n".join(c) for c in out]
 
+    def heading_items(self, md: str):
+        """Yield (release heading, item title, item body) for item_level pages."""
+        rel_level = len(self.release_prefix) - 1
+        release, title, body, release_had_items = None, None, [], False
+        release_body: list[str] = []
+
+        def flush_release():
+            if release and not release_had_items:  # no item headings: bullets are the rows
+                for b in self.children(release_body):
+                    first, _, rest = b.partition("\n")
+                    yield release, first, b
+        for line in md.splitlines() + ["# end"]:
+            hm = re.match(r"^(#{1,6})\s+(.*)$", line)
+            if hm:
+                level = len(hm.group(1))
+                if title is not None:
+                    yield release, title, "\n".join(body)
+                    title, body = None, []
+                if level == self.item_level and release:
+                    title, release_had_items = hm.group(2).strip(), True
+                    continue
+                if level <= rel_level:
+                    yield from flush_release()
+                    release = hm.group(2).strip() if level == rel_level else None
+                    release_had_items, release_body = False, []
+                continue
+            if title is not None:
+                body.append(line)
+            elif release:
+                release_body.append(line)
+
     def parse(self, md: str) -> list[Update]:
+        if self.item_level:
+            return self.parse_heading_items(md)
         out: list[Update] = []
         used: set[str] = set()
         for heading, body, group in self.items(md):
@@ -225,5 +264,37 @@ class MarkdownChangelog:
                 technology=self.technology, source=self.id, source_id=sid, date=date,
                 date_precision=precision, title=text, url=f"{self.page_url}#{anchor}",
                 links=links, label=label, capability_hint=self.hint, capability_fallback=self.fallback,
+            ))
+        return out
+
+    def parse_heading_items(self, md: str) -> list[Update]:
+        out: list[Update] = []
+        used: set[str] = set()
+        for heading, title_md, body in self.heading_items(md):
+            hd = heading_date(self.heading_strip.sub("", heading) if self.heading_strip else heading)
+            if not hd:
+                continue
+            date, precision = hd
+            title = plain(title_md)
+            summary = plain(body)
+            if self.strip_text:
+                title = " ".join(self.strip_text.sub(" ", title).split())
+            links = []
+            for _, href in MD_LINK.findall(title_md + "\n" + body):
+                u = self.page_link(urljoin(self.page_url, href))
+                if u.startswith("http") and u not in links:
+                    links.append(u)
+            anchor = slug(heading)
+            sid = f"{self.page_url}#{anchor}::{slug(title)}"
+            n = 2
+            while sid in used:
+                sid = f"{self.page_url}#{anchor}::{slug(title)}-{n}"
+                n += 1
+            used.add(sid)
+            out.append(Update(
+                technology=self.technology, source=self.id, source_id=sid, date=date,
+                date_precision=precision, title=title, url=f"{self.page_url}#{anchor}",
+                summary=summary if summary != title else "", links=links,
+                capability_hint=self.hint, capability_fallback=self.fallback,
             ))
         return out

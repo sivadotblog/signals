@@ -105,6 +105,7 @@ def run_pipeline(tmp: Path, out: Path):
     args = ["--data", str(data), "all", "--input", f"databricks-rss={FIXTURE}",
             "--input", f"snowflake-release-notes={ROOT / 'tests' / 'fixtures' / 'snowflake-all-release-notes.html'}",
             "--input", f"mongodb-atlas-changelog={ROOT / 'tests' / 'fixtures' / 'mongodb-atlas-changelog.md'}",
+            "--input", f"azure-managed-redis-whats-new={ROOT / 'tests' / 'fixtures' / 'azure-managed-redis-whats-new.md'}",
             "--input", f"alloydb-release-notes={ROOT / 'tests' / 'fixtures' / 'alloydb-release-notes.xml'}",
             "--input", f"azure-postgresql-release-notes={ROOT / 'tests' / 'fixtures' / 'azure-postgresql-release-notes.md'}",
             "--out", str(out)]
@@ -336,3 +337,26 @@ def test_alloydb_atom_sections():
     assert [u.capability for u in sec] == ["security", "security"]  # tags stage first
     dep = next(u for u in ups if "Deprecated" in u.tags)
     assert dep.kind == "deprecation"  # from the vendor's type heading
+
+
+def test_azure_managed_redis_heading_items():
+    spec = next(c for t in load_config(ROOT) if t["id"] == "azure-managed-redis" for c in t["collectors"])
+    tax = load_taxonomy(ROOT / "config" / "capabilities" / "azure-managed-redis.yaml")
+    ups = [classify(tax, u) for u in build("azure-managed-redis", spec).collect(
+        str(ROOT / "tests" / "fixtures" / "azure-managed-redis-whats-new.md"))]
+    t = {u.title: u for u in ups}
+    assert len(ups) == len({u.id for u in ups}) == 9
+    cp = t["Custom data access permissions (preview)"]
+    assert (cp.date, cp.status, cp.capability) == ("2026-05-01", "public-preview", "security")
+    assert cp.links == ["https://learn.microsoft.com/en-us/azure/redis/configure-access-permissions"]
+    assert t["Dashboards with Grafana"].status == ""  # no label in the heading
+    assert t["Scaling a cache (GA)"].status == "ga"  # release with no item headings: bullets are rows
+    assert "Scaling a cache" not in t  # bullets inside an item belong to its summary
+    assert t["Azure Managed Redis (preview)"].capability == "service"
+
+
+def test_all_taxonomies_load_and_match_config():
+    ids = [t["id"] for t in load_config(ROOT)]
+    for tid in ids:
+        tax = load_taxonomy(ROOT / "config" / "capabilities" / f"{tid}.yaml")
+        assert tax.technology == tid

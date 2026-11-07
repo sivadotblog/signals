@@ -1,0 +1,55 @@
+# Azure Managed Redis capability taxonomy.
+#
+# The page lists each change as a ### heading under a ## Month YYYY release.
+# Status comes from the heading: "(preview)", "(GA)", "General Availability".
+# First match wins: title regexes, then docs links (`paths` under /azure/redis/).
+# Check the "Other" page after changes:
+#   python -m signals report --tech azure-managed-redis
+
+technology: azure-managed-redis
+name: Azure Managed Redis
+default_capability: other
+
+doc_path_pattern: '^https://learn\.microsoft\.com/(?:[a-z]{2}-[a-z]{2}/)?azure/redis/([^?#]*)'
+ignore_link_paths: []
+
+status_rules:
+  - {value: ga, match: '\bgeneral availability\b|\bgenerally available\b|\(ga\)'}
+  - {value: private-preview, match: '\bprivate preview\b'}
+  - {value: public-preview, match: '\(preview\)|\bpublic preview\b'}
+
+capabilities:
+  - id: service
+    name: Service launches
+    description: Azure Managed Redis itself moving through preview and GA.
+    title: ['^azure managed redis (?:\(preview\)|general availability)']
+
+  - id: tiers-skus
+    name: Tiers, SKUs and pricing
+    title: ['\bskus?\b', '\btiers?\b', '\bflash optimized\b', '\bmemory optimized\b', '\bcompute optimized\b', '\bbalanced\b', '\breservations?\b', '\bpricing\b']
+    paths: ['overview', 'reserved-pricing']
+
+  - id: security
+    name: Security and access
+    title: ['\baccess\b', '\bacl\b', '\bentra\b', '\bauthentication\b', '\bencryption\b', '\bcmk\b', '\bprivate link\b', '\bnetwork']
+    paths: ['configure-access-permissions', 'entra-for-authentication', 'private-link']
+
+  - id: operations
+    name: Scaling, persistence and maintenance
+    title: ['\bscal(?:e|ing)\b', '\bpersistence\b', '\bmaintenance\b', '\bclustering\b', '\bnon-clustered\b', '\bupgrade\b', '\bgeo-replication\b', '\bzone\b']
+    paths: ['how-to-scale', 'how-to-persistence', 'scheduled-maintenance', 'how-to-upgrade', 'how-to-active-geo-replication']
+
+  - id: monitoring
+    name: Monitoring and observability
+    title: ['\bgrafana\b', '\bmetrics?\b', '\bmonitor', '\blogs?\b', '\bdashboards?\b', '\bdiagnostic']
+    paths: ['grafana-dashboards', 'monitor']
+
+  - id: features
+    name: Redis features and modules
+    title: ['\bkeyspace notifications\b', '\bmodules?\b', '\bsearch\b', '\bjson\b', '\bbloom\b', '\btime ?series\b', '\bvector\b', '\bpub/?sub\b']
+    paths: ['enable-redis-keyspace-notifications', 'redis-modules']
+
+  - id: migration
+    name: Migration
+    title: ['\bmigrat']
+    paths: ['migrate/']
