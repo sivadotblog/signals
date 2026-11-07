@@ -21,7 +21,7 @@ technologies:
       # Query params widen the page's default filter (server and feature updates, last 30 days).
       - id: snowflake-release-notes
         type: snowflake-release-notes
-        url: https://docs.snowflake.com/en/release-notes/all-release-notes?changeType=all&datePreset=all
+        url: https://docs.snowflake.com/en/release-notes/all-release-notes?date_preset=all
         split_digest: true
         no_split_title: '\(general availability\)|\(preview\)|\(public preview\)|\(private preview\)|generally available|behavior change'
         no_split_bullet: '\b20\d\d\b'
