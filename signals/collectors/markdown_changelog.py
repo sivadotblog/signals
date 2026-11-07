@@ -90,7 +90,8 @@ def heading_date(text: str) -> tuple[str, str] | None:
 
 def plain(md: str) -> str:
     text = MD_LINK.sub(r"\1", md)
-    text = re.sub(r"[*_]{1,2}([^*_]+)[*_]{1,2}", r"\1", text)  # emphasis
+    text = re.sub(r"\*{1,2}([^*]+)\*{1,2}", r"\1", text)  # *emphasis* and **bold**
+    text = re.sub(r"(?<!\w)_{1,2}([^_]+)_{1,2}(?!\w)", r"\1", text)  # _emphasis_, not snake_case
     text = text.replace("`", "")
     return " ".join(text.split())
 

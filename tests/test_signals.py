@@ -300,3 +300,9 @@ def test_mcp_sse_decode():
     body = 'event: message\ndata: {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"# T"}]}}\n\n'
     assert _decode(body, "text/event-stream")[0]["result"]["content"][0]["text"] == "# T"
     assert _decode('{"jsonrpc":"2.0","id":1,"result":{}}', "application/json")[0]["id"] == 1
+
+
+def test_plain_keeps_identifiers():
+    from signals.collectors.markdown_changelog import plain
+    assert plain("Support for `pg_stat_reset_shared('bgwriter');` and _emphasis_ and **bold**") == \
+        "Support for pg_stat_reset_shared('bgwriter'); and emphasis and bold"
