@@ -30,7 +30,8 @@ def fetch(url: str, retries: int = 3) -> str:
 
 def text_of(html: str) -> str:
     text = " ".join(unescape(TAG_RE.sub(" ", html or "")).split())
-    return re.sub(r"\s+([.,;:!?)])", r"\1", text)  # tags leave a space before punctuation
+    text = re.sub(r"\s+([.,;:!?)])", r"\1", text)  # tags leave a space before punctuation
+    return re.sub(r"\(\s+", "(", text)  # and after an opening parenthesis
 
 
 def slug(text: str) -> str:

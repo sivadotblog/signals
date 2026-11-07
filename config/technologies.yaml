@@ -64,3 +64,15 @@ technologies:
         group_label: 'General availability|Public preview|Private preview|Preview'
         label_prefix: '^(General availability|Public preview|Private preview|Preview)\b\s*(?:of\b|:)?\s*'
         strip_text: '\s*\^\$\^|\$\^'
+
+  - id: alloydb
+    name: AlloyDB for PostgreSQL
+    # Atom feed. Every Google Cloud product has one at docs.cloud.google.com/feeds/<product>-release-notes.xml.
+    # One entry per date; each <h3> type heading (Feature, Change, Fixed ...) starts one change.
+    # The feed keeps about the last 30 dates. Daily runs keep everything from today forward.
+    collectors:
+      - id: alloydb-release-notes
+        type: rss
+        url: https://docs.cloud.google.com/feeds/alloydb-release-notes.xml
+        split_heading: h3
+        label_link: 'product-launch-stages'

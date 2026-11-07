@@ -1,0 +1,102 @@
+# AlloyDB for PostgreSQL capability taxonomy.
+#
+# First match wins, by stage: item title (first sentence of the change), source tags,
+# docs links (`paths` under /alloydb/docs/), then default_capability.
+# Status comes from the launch-stage link text the vendor wrote ("Preview", "in Preview",
+# "GA"), moved to `label` by the collector, then from the title.
+# Type comes from the vendor's own type heading (kind_tags), then title phrases.
+# Check the "Other" page after changes:
+#   python -m signals report --tech alloydb
+
+technology: alloydb
+name: AlloyDB for PostgreSQL
+default_capability: other
+
+doc_path_pattern: '^https://(?:docs\.)?cloud\.google\.com/alloydb/docs/([^?#]*)'
+ignore_link_paths: ['release-notes']
+
+# The vendor's "Security" type heading is a tag. Check tags before titles so those
+# changes land on Security even when the text names another area.
+match_order: [hint, tags, parent_title, title, links]
+
+status_rules:
+  - {value: ga, match: '^ga$|\bgenerally available\b|\(ga\)'}
+  - {value: private-preview, match: '\bprivate preview\b'}
+  - {value: public-preview, match: '^(?:in )?preview$|\bpublic preview\b|\(preview\)'}
+
+kind_tags:
+  Deprecated: deprecation
+
+kind_rules:
+  - {value: retirement, match: '\b(?:is|are|has been) (?:now )?(?:retired|shut down)\b'}
+  - {value: deprecation, match: '\bdeprecat|\bend of (?:life|support)\b|\bno longer supported\b'}
+  - {value: coming-soon, match: '\bwill soon\b|\bcoming soon\b'}
+
+capabilities:
+  - id: express
+    name: AlloyDB Express
+    title: ['\balloydb express\b']
+    paths: ['express']
+
+  - id: omni
+    name: AlloyDB Omni
+    title: ['\balloydb omni\b', '\bomni\b']
+    paths: ['omni']
+
+  - id: ai
+    name: AI, vector and ML
+    description: AlloyDB AI, vector search and ScaNN, google_ml_integration, model endpoints, natural language, AI query tuning.
+    title: ['\balloydb ai\b', '\bvector\b', '\bscann\b', '\bembeddings?\b', '\bgoogle_ml_integration\b', '\bmodel endpoints?\b', '\bnatural language\b', '\bai\.[a-z_]+', '\busing ai\b', '\bllm\b', '\bgemini\b', '\bvertex ai\b', '\bmcp\b', '\bagents?\b']
+    paths: ['ai/']
+
+  - id: analytics
+    name: Columnar engine, Iceberg and BigQuery
+    title: ['\bcolumnar\b', '\biceberg\b', '\bbigquery\b', '\banalytical\b', '\blakehouse\b']
+    paths: ['columnar-engine', 'access-iceberg', 'sync-bigquery']
+
+  - id: query-insights
+    name: Query Insights and performance
+    title: ['\bquery insights\b', '\bindex advisor\b', '\bdatabase advisor\b', '\bperformance snapshot', '\bquery plans?\b', '\btune sql\b', '\bquery tuning\b']
+    paths: ['using-query-insights', 'use-index-advisor', 'reference/database-advisor']
+
+  - id: monitoring
+    name: Monitoring and logging
+    title: ['\bmetrics?\b', '\bmonitoring\b', '\blogs?\b', '\blogging\b', '\bdashboards?\b', '\balerts?\b']
+    paths: ['monitor', 'logging']
+
+  - id: ha-replication
+    name: High availability and replication
+    description: Read pools, cross-region replication, failover, switchover.
+    title: ['\bread pools?\b', '\bcross-region\b', '\breplication\b', '\breplicas?\b', '\bfailover\b', '\bswitchover\b', '\bhigh availability\b']
+    paths: ['cross-region-replication', 'read-pool', 'instance-read-pool']
+
+  - id: backup
+    name: Backup and recovery
+    title: ['\bbackups?\b', '\brestore\b', '\bpoint-in-time\b', '\bpitr\b', '\brecovery\b']
+    paths: ['backup']
+
+  - id: migration
+    name: Migration
+    title: ['\bmigrat', '\bdatabase migration service\b', '\bdms\b', '\bimport\b', '\bexport\b']
+    paths: ['migrate', 'import', 'export']
+
+  - id: security
+    name: Security and access
+    title: ['\biam\b', '\bcmek\b', '\bencryption\b', '\bssl\b', '\btls\b', '\bauthentication\b', '\bpasswords?\b', '\bsecurity\b', '\bvpc service controls\b', '\bauditing\b', '\bpgaudit\b']
+    tags: ['Security']
+    paths: ['security', 'database-users', 'manage-iam', 'cmek', 'audit']
+
+  - id: networking
+    name: Networking and connectivity
+    title: ['\bprivate service connect\b', '\bpsc\b', '\bpublic ip\b', '\bprivate ip\b', '\bauth proxy\b', '\bconnectors?\b', '\bconnectivity\b', '\bnetwork']
+    paths: ['configure-connectivity', 'about-private-service-connect', 'connect-', 'auth-proxy', 'language-connectors']
+
+  - id: versions-maintenance
+    name: Versions, extensions and maintenance
+    title: ['\bpostgresql (?:major )?version\b', '\bpostgresql \d+\b', '\bmajor version\b', '\bminor version\b', '\bupgrade', '\bmaintenance\b', '\bextensions?\b', '\bflags?\b']
+    paths: ['db-version-policies', 'maintenance', 'reference/extensions', 'upgrade', 'reference/database-flags']
+
+  - id: instances
+    name: Clusters, instances and pricing
+    title: ['\bclusters?\b', '\binstances?\b', '\bmachine types?\b', '\bvcpu\b', '\bstorage\b', '\bscal(?:e|ing)\b', '\bpricing\b', '\bfree trial\b', '\bcommitted use\b', '\bregions?\b']
+    paths: ['cluster', 'instance', 'pricing', 'locations']

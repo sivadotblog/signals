@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fixture: first three entries of docs.cloud.google.com/feeds/alloydb-release-notes.xml (fetched 2026-11-06),
+     plus one synthetic entry (October 01, 2026) to cover Fixed, Security, Deprecated and repeated links. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>tag:google.com,2016:alloydb-release-notes</id>
+  <title>AlloyDB for PostgreSQL - Release notes</title>
+  <link rel="self" href="https://docs.cloud.google.com/feeds/alloydb-release-notes.xml"/>
+  <author>
+    <name>Google Cloud Platform</name>
+  </author>
+  <updated>2026-11-04T00:00:00-08:00</updated>
+
+  <entry>
+    <title>November 04, 2026</title>
+    <id>tag:google.com,2016:alloydb-release-notes#November_04_2026</id>
+    <updated>2026-11-04T00:00:00-08:00</updated>
+    <link rel="alternate" href="https://docs.cloud.google.com/alloydb/docs/release-notes#November_04_2026"/>
+    <content type="html"><![CDATA[<h3>Feature</h3>
+<p>Direct Iceberg access in AlloyDB for PostgreSQL is available for PostgreSQL 18
+and later (<a href="https://cloud.google.com/products#product-launch-stages">in Preview</a>).
+This feature lets you query Apache Iceberg tables in Cloud Storage or Lakehouse
+runtime catalog and accelerate analytical queries using the AlloyDB columnar
+engine.</p>
+<p>For more information, see
+<a href="https://docs.cloud.google.com/alloydb/docs/access-iceberg-data-from-alloydb">Access Iceberg data from
+AlloyDB</a>.</p>
+<h3>Feature</h3>
+<p>Syncing data from BigQuery into AlloyDB is generally available
+(<a href="https://cloud.google.com/products#product-launch-stages">GA</a>). This feature
+lets you copy or mirror analytical tables from BigQuery into AlloyDB for
+low-latency operational access using the <code>alloydb_sync</code> extension.</p>
+<p>For more information, see
+<a href="https://docs.cloud.google.com/alloydb/docs/sync-bigquery-data-to-alloydb">Sync BigQuery data to AlloyDB</a>.</p>
+<h3>Feature</h3>
+<p>AlloyDB Express is available in
+<a href="https://cloud.google.com/products#product-launch-stages">Preview</a> for
+PostgreSQL 18. Optimized for rapid prototyping and for workflows that use AI
+coding agents, this configuration provides the following features:</p>
+<ul>
+<li>Fast provisioning</li>
+<li>Scale-to-zero compute when idle</li>
+<li>A monthly free tier for the first 12 months of usage</li>
+<li>One-click upgrades to AlloyDB for PostgreSQL</li>
+</ul>
+<p>For more information, see
+<a href="https://docs.cloud.google.com/alloydb/docs/express-overview">AlloyDB Express overview</a>.</p>
+]]>
+    </content>
+  </entry>
+
+  <entry>
+    <title>November 03, 2026</title>
+    <id>tag:google.com,2016:alloydb-release-notes#November_03_2026</id>
+    <updated>2026-11-03T00:00:00-08:00</updated>
+    <link rel="alternate" href="https://docs.cloud.google.com/alloydb/docs/release-notes#November_03_2026"/>
+    <content type="html"><![CDATA[<h3>Change</h3>
+<p>AlloyDB for PostgreSQL now defaults to <a href="https://docs.cloud.google.com/alloydb/docs/db-version-policies#support-table">PostgreSQL major version 18</a>
+for new clusters.</p>
+]]>
+    </content>
+  </entry>
+
+  <entry>
+    <title>November 02, 2026</title>
+    <id>tag:google.com,2016:alloydb-release-notes#November_02_2026</id>
+    <updated>2026-11-02T00:00:00-08:00</updated>
+    <link rel="alternate" href="https://docs.cloud.google.com/alloydb/docs/release-notes#November_02_2026"/>
+    <content type="html"><![CDATA[<h3>Feature</h3>
+<p>You can now tune SQL queries using AI. Available starting with version 1.6.2 of
+the <code>google_ml_integration</code> extension, the <code>ai.tune_sql</code> function uses an LLM
+along with query execution plans, schemas, and runtime stats to recommend query
+optimizations. The function identifies performance bottlenecks and provides
+recommendations for query rewrites, indexes, statistics collection, Grand
+Unified Configuration (GUC) flags, and table analyze and vacuum operations.
+This feature is in
+<a href="https://cloud.google.com/products#product-launch-stages">Preview</a>.</p>
+<p>For more information, see
+<a href="https://docs.cloud.google.com/alloydb/docs/tune-sql-queries-ai">Tune SQL queries using AI</a> and
+<a href="https://docs.cloud.google.com/alloydb/docs/reference/database-advisor-flags">Database advisor flags</a>.</p>
+]]>
+    </content>
+  </entry>
+
+  <entry>
+    <title>October 01, 2026</title>
+    <id>tag:google.com,2016:alloydb-release-notes#October_01_2026</id>
+    <updated>2026-10-01T00:00:00-07:00</updated>
+    <link rel="alternate" href="https://docs.cloud.google.com/alloydb/docs/release-notes#October_01_2026"/>
+    <content type="html"><![CDATA[<h3>Fixed</h3>
+<p>Fixed an issue where read pool nodes could restart during maintenance.</p>
+<h3>Security</h3>
+<p>A security update for the <a href="https://docs.cloud.google.com/alloydb/docs/maintenance">maintenance</a> process is available.</p>
+<h3>Security</h3>
+<p>A second update to the <a href="https://docs.cloud.google.com/alloydb/docs/maintenance">maintenance</a> process is available.</p>
+<h3>Deprecated</h3>
+<p>The legacy connectivity mode is deprecated and will be removed in 2027.</p>
+]]>
+    </content>
+  </entry>
+</feed>

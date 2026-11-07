@@ -19,7 +19,9 @@ Status and kind are set only from words the vendor wrote as a label. They are
 never inferred from verbs like "Adds" or "Removes", and never from the summary.
 Status: first `status_rules` regex that matches the collector's `label`, then the
 title. No match means "", which shows as no badge. No label does not mean GA.
-Kind: first `kind_rules` regex that matches the title. No match means "release".
+Kind: a source tag listed in the taxonomy's `kind_tags` (the vendor's own type label,
+e.g. "Deprecated"), then the first `kind_rules` regex that matches the title.
+No match means "release".
 
 Taxonomies can override status_rules and kind_rules. The defaults below are
 generic release vocabulary and name no product.
@@ -73,6 +75,7 @@ class Taxonomy:
     status_rules: list[tuple[str, re.Pattern]]
     kind_rules: list[tuple[str, re.Pattern]]
     match_order: list[str]
+    kind_tags: dict[str, str]
 
     def content_links(self, links: list[str]) -> list[str]:
         """Links minus the ones that point at boilerplate pages (release types, previews page)."""
@@ -125,7 +128,15 @@ def load_taxonomy(path: Path) -> Taxonomy:
         status_rules=_rules(raw.get("status_rules", DEFAULT_STATUS_RULES), STATUSES),
         kind_rules=_rules(raw.get("kind_rules", DEFAULT_KIND_RULES), KINDS),
         match_order=_match_order(raw.get("match_order", DEFAULT_MATCH_ORDER)),
+        kind_tags=_kind_tags(raw.get("kind_tags", {})),
     )
+
+
+def _kind_tags(raw: dict) -> dict[str, str]:
+    bad = {k: v for k, v in raw.items() if v not in KINDS}
+    if bad:
+        raise ValueError(f"kind_tags values must be in {KINDS}: {bad}")
+    return {k.lower(): v for k, v in raw.items()}
 
 
 DEFAULT_MATCH_ORDER = ["hint", "parent_title", "title", "tags", "links"]
@@ -201,6 +212,9 @@ def status_for(tax: Taxonomy, u: Update) -> str:
 
 
 def kind_for(tax: Taxonomy, u: Update) -> str:
+    for t in u.tags:
+        if t.lower() in tax.kind_tags:
+            return tax.kind_tags[t.lower()]
     return next((v for v, rx in tax.kind_rules if rx.search(u.title)), "release")
 
 

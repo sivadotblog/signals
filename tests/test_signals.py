@@ -105,6 +105,7 @@ def run_pipeline(tmp: Path, out: Path):
     args = ["--data", str(data), "all", "--input", f"databricks-rss={FIXTURE}",
             "--input", f"snowflake-release-notes={ROOT / 'tests' / 'fixtures' / 'snowflake-all-release-notes.html'}",
             "--input", f"mongodb-atlas-changelog={ROOT / 'tests' / 'fixtures' / 'mongodb-atlas-changelog.md'}",
+            "--input", f"alloydb-release-notes={ROOT / 'tests' / 'fixtures' / 'alloydb-release-notes.xml'}",
             "--input", f"azure-postgresql-release-notes={ROOT / 'tests' / 'fixtures' / 'azure-postgresql-release-notes.md'}",
             "--out", str(out)]
     assert main(args) == 0
@@ -306,3 +307,32 @@ def test_plain_keeps_identifiers():
     from signals.collectors.markdown_changelog import plain
     assert plain("Support for `pg_stat_reset_shared('bgwriter');` and _emphasis_ and **bold**") == \
         "Support for pg_stat_reset_shared('bgwriter'); and emphasis and bold"
+
+
+AL_FIXTURE = ROOT / "tests" / "fixtures" / "alloydb-release-notes.xml"
+AL_TAX = load_taxonomy(ROOT / "config" / "capabilities" / "alloydb.yaml")
+
+
+def collect_alloydb():
+    spec = next(c for t in load_config(ROOT) if t["id"] == "alloydb" for c in t["collectors"])
+    return [classify(AL_TAX, u) for u in build("alloydb", spec).collect(str(AL_FIXTURE))]
+
+
+def test_alloydb_atom_sections():
+    ups = collect_alloydb()
+    assert len(ups) == len({u.id for u in ups}) == 9  # one row per <h3> section
+    ice = ups[0]
+    assert ice.date == "2026-11-04" and ice.parent_title == "November 04, 2026"
+    assert (ice.label, ice.status, ice.capability) == ("in Preview", "public-preview", "analytics")
+    assert ice.url == "https://docs.cloud.google.com/alloydb/docs/release-notes#November_04_2026"
+    assert ice.links == ["https://docs.cloud.google.com/alloydb/docs/access-iceberg-data-from-alloydb"]  # launch-stage link removed
+    bq = ups[1]
+    assert bq.title == "Syncing data from BigQuery into AlloyDB is generally available (GA)." and bq.status == "ga"
+    tune = next(u for u in ups if u.title == "You can now tune SQL queries using AI.")
+    assert tune.status == "public-preview"  # label from the launch-stage link, not the title
+    chg = next(u for u in ups if "Change" in u.tags)
+    assert chg.status == "" and chg.capability == "versions-maintenance"
+    sec = [u for u in ups if "Security" in u.tags]
+    assert [u.capability for u in sec] == ["security", "security"]  # tags stage first
+    dep = next(u for u in ups if "Deprecated" in u.tags)
+    assert dep.kind == "deprecation"  # from the vendor's type heading
