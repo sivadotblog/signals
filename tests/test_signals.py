@@ -105,6 +105,7 @@ def run_pipeline(tmp: Path, out: Path):
     args = ["--data", str(data), "all", "--input", f"databricks-rss={FIXTURE}",
             "--input", f"snowflake-release-notes={ROOT / 'tests' / 'fixtures' / 'snowflake-all-release-notes.html'}",
             "--input", f"mongodb-atlas-changelog={ROOT / 'tests' / 'fixtures' / 'mongodb-atlas-changelog.md'}",
+            "--input", f"azure-postgresql-release-notes={ROOT / 'tests' / 'fixtures' / 'azure-postgresql-release-notes.md'}",
             "--out", str(out)]
     assert main(args) == 0
     return data
@@ -261,3 +262,41 @@ def test_month_precision_renders_month(tmp_path):
     run_pipeline(tmp_path, out)
     page = (out / "mongodb" / "stream-processing.md").read_text()
     assert "| 2026-10 | " in page and "| 2026-10-01 |" not in page
+
+
+PG_FIXTURE = ROOT / "tests" / "fixtures" / "azure-postgresql-release-notes.md"
+PG_TAX = load_taxonomy(ROOT / "config" / "capabilities" / "azure-postgresql.yaml")
+
+
+def collect_pg():
+    spec = next(c for t in load_config(ROOT) if t["id"] == "azure-postgresql" for c in t["collectors"])
+    return [classify(PG_TAX, u) for u in build("azure-postgresql", spec).collect(str(PG_FIXTURE))]
+
+
+def test_azure_postgresql_groups_and_labels():
+    ups = collect_pg()
+    assert len(ups) == len({u.id for u in ups}) == 15
+    assert not any(u.title in ("Preview", "General availability") for u in ups)  # group bullets are not rows
+    sm = next(u for u in ups if u.title.startswith("System metrics"))
+    assert (sm.label, sm.status, sm.capability, sm.date, sm.date_precision) == (
+        "Preview", "public-preview", "monitoring", "2026-10-01", "month")
+    assert sm.links[0] == "https://learn.microsoft.com/en-us/azure/postgresql/monitor/concepts-monitoring#system-metrics-preview"
+    assert sm.url.endswith("/release-notes/release-notes#release-october-2026")
+    pre = [u for u in ups if u.title.startswith("Pre-upgrade validation checks")]
+    assert sorted(u.status for u in pre) == ["ga", "public-preview"]  # same feature, two releases
+    fm = next(u for u in ups if u.title.startswith("Fabric Mirroring"))
+    assert (fm.label, fm.status, fm.capability) == ("Public preview", "public-preview", "fabric-integration")
+    assert not any("^$^" in u.title for u in ups)
+    vp = next(u for u in ups if "version policy" in u.title)
+    assert (vp.kind, vp.capability) == ("deprecation", "versions-upgrades")
+    assert any(u.date == "2024-08-01" for u in ups)  # "Aug 2024"
+    assert not any("Azure Support" in u.title for u in ups)  # Contacts is not a release
+    ansible = next(u for u in ups if "Ansible" in u.title)
+    assert ansible.status == "" and ansible.label == ""  # no label written, no status
+
+
+def test_mcp_sse_decode():
+    from signals.collectors.learn_page import _decode
+    body = 'event: message\ndata: {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"# T"}]}}\n\n'
+    assert _decode(body, "text/event-stream")[0]["result"]["content"][0]["text"] == "# T"
+    assert _decode('{"jsonrpc":"2.0","id":1,"result":{}}', "application/json")[0]["id"] == 1

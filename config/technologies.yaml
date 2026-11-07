@@ -50,3 +50,17 @@ technologies:
         url: https://www.mongodb.com/docs/charts/release-notes.md
         page_url: https://www.mongodb.com/docs/charts/release-notes/
         capability_hint: charts
+
+  - id: azure-postgresql
+    name: Azure Database for PostgreSQL
+    # Source repo (azure-databases-docs-pr) is private and the public mirror is 404.
+    # The Learn page is read as markdown through Learn's public MCP endpoint (fetch tool only).
+    collectors:
+      - id: azure-postgresql-release-notes
+        type: learn-page
+        url: https://learn.microsoft.com/en-us/azure/postgresql/release-notes/release-notes
+        release_level: 2
+        heading_strip: '^Release:\s*'
+        group_label: 'General availability|Public preview|Private preview|Preview'
+        label_prefix: '^(General availability|Public preview|Private preview|Preview)\b\s*(?:of\b|:)?\s*'
+        strip_text: '\s*\^\$\^|\$\^'

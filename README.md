@@ -12,7 +12,7 @@ Collectors read sources such as RSS feeds and write normalized records. Fixed ru
 config/technologies.yaml            technologies and their collectors
 config/capabilities/<tech>.yaml     capability taxonomy and matching rules
 signals/model.py                    normalized Update record
-signals/collectors/                 collector registry; rss.py, markdown_changelog.py, snowflake_docs.py, common.py
+signals/collectors/                 collector registry; rss.py, markdown_changelog.py, learn_page.py, snowflake_docs.py, common.py
 signals/classify.py                 capability, status and type rules
 signals/store.py                    data/<tech>/updates.jsonl
 signals/render.py                   Docusaurus markdown
@@ -88,6 +88,7 @@ python -m signals collect --input databricks-rss=tests/fixtures/databricks-feed.
 |---|---|---|
 | Databricks | `rss` | `learn.microsoft.com/en-us/azure/databricks/feed.xml`. Digest items are split into one row per bullet. |
 | MongoDB | `markdown-changelog` | Each changelog listed on `mongodb.com/docs/atlas/release-notes/`, read as markdown (URL + `.md`). One row per bullet under a dated `###` heading. 2026 headings give only the month. Product changelogs pass `capability_hint`. |
+| Azure Database for PostgreSQL | `learn-page` | The Learn release notes page, read as markdown through Learn's public MCP endpoint (`learn.microsoft.com/api/mcp`, fetch tool only, fixed URL). The source repo is private. Each run fetches twice and fails the source if the copies differ. Status comes from the group bullet ("General availability", "Preview") or an inline prefix. Dates are month only. |
 | Snowflake | `snowflake-release-notes` | `docs.snowflake.com/en/release-notes/all-release-notes`. No RSS feed, and the `.md` copy is empty. The page embeds its entries as JSON in `__NEXT_DATA__`. Server releases are split into one row per feature. Keywords and change type become tags. |
 
 ## Add a technology

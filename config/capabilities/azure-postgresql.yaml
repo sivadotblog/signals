@@ -1,0 +1,107 @@
+# Azure Database for PostgreSQL capability taxonomy.
+#
+# First match wins, by stage: item title (`title` regexes), docs links (`paths`
+# prefixes, relative to /azure/postgresql/), then default_capability.
+# The page's links point into folders that match capabilities (monitor/, security/,
+# read-replica/ ...), so `paths` does most of the work.
+# Check the "Other" page after changes:
+#   python -m signals report --tech azure-postgresql
+
+technology: azure-postgresql
+name: Azure Database for PostgreSQL
+default_capability: other
+
+doc_path_pattern: '^https://learn\.microsoft\.com/(?:[a-z]{2}-[a-z]{2}/)?azure/postgresql/([^?#]*)'
+ignore_link_paths: ['release-notes/']
+
+# The page writes status as a group bullet ("- General availability", "- Preview")
+# or as an inline prefix ("Public preview of ..."). The collector moves either to `label`.
+status_rules:
+  - {value: ga, match: '^general availability$|\bgenerally available\b'}
+  - {value: private-preview, match: '\bprivate preview\b'}
+  - {value: public-preview, match: '^preview$|^public preview$|\bpublic preview\b|\(preview\)'}
+
+kind_rules:
+  - {value: retirement, match: '\b(?:is|are|has been) (?:now )?retired\b'}
+  - {value: deprecation, match: '\bdeprecat|\bretires? on\b|\bend of (?:life|support)\b|\bno longer supported\b'}
+  - {value: coming-soon, match: '\bwill soon\b|\bcoming soon\b'}
+
+capabilities:
+  - id: ai-vector
+    name: AI, vector and graph
+    description: azure_ai, pgvector, DiskANN, AGE, MCP Server, solution accelerators.
+    title: ['\bazure_(?:local_)?ai\b', '\bpgvector\b', '\bvector\b', '\bdiskann\b', '\bage\b', '\bgraphrag\b', '\bsemantic ranker\b', '\bmodel context protocol\b', '\bmcp\b', '\bai functions\b', '\bmachine learning\b', '\blanguage translations?\b']
+    paths: ['azure-ai/', 'extensions/how-to-use-pgvector', 'extensions/how-to-use-pgdiskann']
+
+  - id: elastic-clusters
+    name: Elastic clusters
+    title: ['\belastic clusters?\b']
+    paths: ['elastic-clusters/']
+
+  - id: fabric-integration
+    name: Fabric and integrations
+    description: Fabric mirroring and Database Hub, Data Factory, Power BI, automation tasks, Stream Analytics.
+    title: ['\bfabric\b', '\bdata factory\b', '\bsynapse\b', '\bpower bi\b', '\bautomation tasks?\b', '\bstream analytics\b']
+    paths: ['integration/']
+
+  - id: tooling
+    name: SDKs, CLI, Terraform and VS Code
+    title: ['\bterraform\b', '\bansible\b', '\bsdks?\b', '\brest api\b', '\bazure cli\b', '\bvisual studio code\b', '\bcopilot\b', '\bazure policy\b']
+    paths: ['development/', 'connectivity/connect-azure-cli']
+
+  - id: migration
+    name: Migration
+    title: ['\bmigrat']
+    paths: ['migrate/']
+
+  - id: pgbouncer
+    name: PgBouncer and connectivity
+    title: ['\bpgbouncer\b', '\bconnection pool']
+    paths: ['connectivity/']
+
+  - id: monitoring
+    name: Monitoring, logs and tuning
+    description: Metrics, logs, Query Store, Query Performance Insight, index tuning, workbooks, Grafana.
+    title: ['\bmetrics?\b', '\bmonitoring\b', '\blogs?\b', '\bquery store\b', '\bquery performance insight\b', '\bindex tuning\b', '\bworkbooks?\b', '\bgrafana\b', '\bdashboards?\b', '\bresource health\b', '\btroubleshooting guides\b']
+    paths: ['monitor/', 'troubleshoot/']
+
+  - id: high-availability
+    name: High availability, replicas and DR
+    title: ['\bhigh availability\b', '\b\(ha\)', '\bread replicas?\b', '\bgeo-replication\b', '\bgeo-disaster\b', '\bvirtual endpoints?\b', '\bfailover\b', '\bavailability zone\b', '\bzone-(?:redundant|resilient)\b']
+    paths: ['high-availability/', 'read-replica/']
+
+  - id: backup
+    name: Backup and restore
+    title: ['\bbackups?\b', '\brestore\b', '\bpoint-in-time\b', '\blong-term retention\b']
+    paths: ['backup-restore/']
+
+  - id: versions-upgrades
+    name: Versions, upgrades and maintenance
+    description: PostgreSQL major and minor versions, major version upgrades, maintenance, version policy.
+    title: ['\bminor versions?\b', '\bminors\b', '\bpostgresql \d+\b', '\bpostgres \d+\b', '\bmajor version upgrades?\b', '\bupgrade', '\bmaintenance\b', '\bversion policy\b', '\bsupported versions\b']
+    paths: ['configure-maintain/concepts-supported-versions', 'configure-maintain/concepts-major-version-upgrade', 'configure-maintain/concepts-maintenance', 'configure-maintain/concepts-version-policy', 'release-notes-maintenance/']
+
+  - id: security
+    name: Security and encryption
+    title: ['\bentra\b', '\bencryption\b', '\bcmk\b', '\bkey version\b', '\btls\b', '\bscram\b', '\bdefender\b', '\bcspm\b', '\bconfidential computing\b', '\bsecurity\b', '\bcompliance\b', '\banonymizer\b']
+    paths: ['security/']
+
+  - id: networking
+    name: Networking
+    title: ['\bprivate endpoints?\b', '\bprivate link\b', '\bvirtual network\b', '\bprivate dns\b', '\bfirewall\b', '\bnon-ssl\b', '\brequire_secure_transport\b']
+    paths: ['network/']
+
+  - id: extensions
+    name: Extensions
+    title: ['\bextensions?\b', '\btimescaledb\b', '\bpostgis\b', '\bpg_[a-z_]+\b', '\bpglogical\b', '\boracle_fdw\b', '\borafce\b', '\bplv8\b', '\bpgrouting\b', '\bhll\b', '\btopn\b', '\btdigest\b']
+    paths: ['extensions/']
+
+  - id: compute-storage
+    name: Compute, storage and scaling
+    title: ['\bstorage\b', '\bssd\b', '\biops\b', '\bskus?\b', '\bcompute\b', '\bscaling\b', '\bautogrow\b', '\breserved capacity\b', '\btablespace\b']
+    paths: ['compute-storage/', 'scale/', 'configure-maintain/concepts-storage', 'configure-maintain/concepts-reserved-pricing', 'configure-maintain/concepts-compute']
+
+  - id: regions
+    name: Regions
+    title: ['\bregions?\b']
+    paths: ['overview']
