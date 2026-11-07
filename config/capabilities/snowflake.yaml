@@ -117,7 +117,7 @@ capabilities:
   - id: iceberg
     name: Apache Iceberg and open formats
     description: Iceberg tables, Horizon Iceberg REST Catalog, Delta Direct and Parquet Direct.
-    title: ['\biceberg\b', '\bdelta direct\b', '\bparquet direct\b', '\bcatalog-linked\b']
+    title: ['iceberg', '\bdelta direct\b', '\bonelake\b', '\bparquet direct\b', '\bcatalog-linked\b']
     tags: ['Apache Iceberg', 'Apache Iceberg tables', 'Iceberg', 'Iceberg tables', 'Iceberg REST Catalog', 'IRC', 'Delta Direct', 'Parquet Direct']
     paths: ['user-guide/tables-iceberg']
 
@@ -127,8 +127,8 @@ capabilities:
     tags: ['Streamlit']
 
   - id: native-apps
-    name: Native Apps
-    title: ['\bnative apps?\b']
+    name: Native Apps and App Runtime
+    title: ['\bnative apps?\b', '\bapp runtime\b', '\bapp\.yml\b']
     tags: ['Native Apps']
 
   - id: spcs
@@ -138,7 +138,7 @@ capabilities:
 
   - id: sharing
     name: Sharing, listings and Marketplace
-    title: ['\bsharing\b', '\bshares?\b', '\blistings?\b', '\bmarketplace\b', '\blisting_access_history\b']
+    title: ['\bprivate offers?\b', '\bpricing plans?\b', '\boffers\b', '\bsharing\b', '\bshares?\b', '\blistings?\b', '\bmarketplace\b', '\blisting_access_history\b']
     tags: ['Data Sharing', 'Open Data Sharing', 'Listings', 'Snowflake Marketplace', 'Agentic Marketplace Discovery']
 
   - id: governance
@@ -147,14 +147,19 @@ capabilities:
     title: ['\bhorizon\b', '\btags?\b', '\btagging\b', '\bclassification\b', '\bsensitive data\b', '\bdata protection\b', '\bmasking\b', '\brow access\b', '\baccess history\b', '\brequest access\b', '\blineage\b', '\btrust center\b']
     tags: ['Data Governance', 'Horizon Catalog', 'Horizon Context', 'Object Tagging', 'Object tagging', 'Tags', 'Sensitive Data Classification', 'Data Protection', 'Trust Center', 'Request Access']
 
+  - id: data-quality
+    name: Data quality and DMFs
+    title: ['\bdata quality\b', '\bdmfs?\b', '\bdata metric']
+    tags: ['Data Quality', 'Data Metric Functions']
+
   - id: security
     name: Security and networking
-    title: ['\boauth\b', '\bsecrets?\b', '\bnetwork polic', '\bingress\b', '\begress\b', '\bprivatelink\b', '\btri-secret\b', '\bworkload identity\b', '\bauthentication\b', '\bmfa\b', '\bpasswords?\b', '\bfeature polic', '\bcustomer-managed key\b']
+    title: ['\bmalicious ip\b', '\bsecurity essentials\b', '\bscanners?\b', '\bfindings\b', '\bnetwork rules?\b', '\becdsa\b', "\\b(?:caller|owner)'s rights\\b", '\bgrants?\b', '\bsession polic', '\bprogrammatic access tokens?\b', '\bauthentication polic', '\bpassword polic', '\boauth\b', '\bsecrets?\b', '\bnetwork polic', '\bingress\b', '\begress\b', '\bprivatelink\b', '\btri-secret\b', '\bworkload identity\b', '\bauthentication\b', '\bmfa\b', '\bpasswords?\b', '\bfeature polic', '\bcustomer-managed key\b']
     tags: ['Security', 'Authentication', 'Workload Identity', 'Secrets', 'Networking', 'Ingress policies', 'Egress IP', 'Tri-Secret Secure', 'TSS', 'CMK', 'Feature policies', 'Access Control']
 
   - id: devops
     name: dbt Projects, DCM and DevOps
-    title: ['\bdbt\b', '\bdcm projects?\b', '\bgit\b', '\bterraform\b', '\bdevops\b']
+    title: ['\bdbt\b', '\bdcm projects?\b', '\bgit\b', '\bsnowgit\b', '\bterraform\b', '\bdevops\b']
     tags: ['DCM Projects', 'DevOps']
 
   - id: notebooks-workspaces
@@ -193,9 +198,26 @@ capabilities:
     title: ['\bwarehouses?\b', '\bgen2\b', '\bquery acceleration\b', '\bsearch optimization\b', '\bclustering\b', '\bperformance\b', '\binstance families\b', '\bcompaction\b', '\brecompact']
     tags: ['Performance', 'Search Optimization', 'Instance Families', 'data compaction']
 
+  - id: migration
+    name: Migration and SnowConvert
+    title: ['\bmigrat', '\bsnowconvert\b']
+    tags: ['SnowConvert', 'Migration']
+
+  - id: organizations
+    name: Organizations and accounts
+    description: Organization accounts, Organization Command Center and Hub, ORGANIZATION_USAGE, maintenance policies.
+    title: ['\borganization', '\bmaintenance polic', '\baccounts?\b']
+    tags: ['Organizations', 'Organization accounts']
+
+  - id: observability
+    name: Account Usage and observability
+    description: ACCOUNT_USAGE views, query history, event tables and telemetry.
+    title: ['\baccount usage\b', '\b[a-z_]+_history\b', '\bquery history\b', '\bevent tables?\b', '\btelemetry\b', '\bobservability\b', '\btrail\b', '\bviews?\b']
+    tags: ['Observability', 'Event Tables', 'Snowflake Trail']
+
   - id: sql
     name: SQL and data types
-    title: ['\bsql\b', '\bdata types?\b', '\bfunctions?\b', '\bvariables\b', '\bcreate or alter\b', '\bselect\b', '\bipaddress\b', '\buuid\b', '\bstructured types?\b', '\bschema evolution\b']
+    title: ['\bsql\b', '\bdata types?\b', '\bfunctions?\b', '\bvariables\b', '\bcreate or alter\b', '\bselect\b', '\bipaddress\b', '\buuid\b', '\bstructured types?\b', '\bschema evolution\b', '\bcolumns?\b', '\btypes?\b', '\bvariables?\b', '\bdml\b', '\bformats?\b', '\bsize limit\b', '\bparameters?\b', '\bcommands?\b', '\bstatements?\b', '\bdirectory\b', '\bstages?\b', '\bmerge\b', '\bunion\b', '\bjoins?\b', '\bpipe operator\b', '\boperators?\b', '\bscripting\b', '\btime-series\b', '\btzdb\b']
     tags: ['SQL', 'DDL', 'Data Types', 'Structured types', 'Schema variables', 'Variables']
 
   - id: snowsight
