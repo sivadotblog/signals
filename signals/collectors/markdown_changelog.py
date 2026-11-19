@@ -44,6 +44,7 @@ Params (from technologies.yaml):
                    under the release heading (## May 2026 / ### Feature title / text).
                    The item heading is the title and the text under it the summary.
                    A release with no item headings uses its bullets as rows.
+                   Headings deeper than item_level belong to the item above.
   page_url_slash   add a trailing slash to page_url when it has none, default true.
                    Turn off for sites whose pages have no trailing slash, so relative
                    links resolve against the page's folder.
@@ -212,6 +213,9 @@ class MarkdownChangelog:
             hm = re.match(r"^(#{1,6})\s+(.*)$", line)
             if hm:
                 level = len(hm.group(1))
+                if title is not None and level > self.item_level:
+                    body.append(line)  # a sub-heading inside an item is part of its text
+                    continue
                 if title is not None:
                     yield release, title, "\n".join(body)
                     title, body = None, []

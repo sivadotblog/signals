@@ -12,7 +12,7 @@ Collectors read sources such as RSS feeds and write normalized records. Fixed ru
 config/technologies.yaml            technologies and their collectors
 config/capabilities/<tech>.yaml     capability taxonomy and matching rules
 signals/model.py                    normalized Update record
-signals/collectors/                 collector registry; rss.py, markdown_changelog.py, learn_page.py, snowflake_docs.py, common.py
+signals/collectors/                 collector registry; rss.py, markdown_changelog.py, learn_page.py, hugo_changelog.py, snowflake_docs.py, common.py
 signals/classify.py                 capability, status and type rules
 signals/store.py                    data/<tech>/updates.jsonl
 signals/render.py                   Docusaurus markdown
@@ -44,7 +44,7 @@ Each update is one JSON line.
 
 Status is the status the announcement gave on its date. It is not the current status. A feature that went from Beta to GA has two rows.
 
-Status and type are set only from words the vendor wrote as a label: "(Beta)", "is now generally available", "Public Preview:", "is retired", "end of life", "will soon". They are never inferred from verbs like "Adds" or "Removes", and never from summary text. No label means no status badge. It does not mean GA.
+Status and type are set only from words the vendor wrote as a label: "(Beta)", "is now generally available", "Public Preview:", "is retired", "end of life", "will soon". They are never inferred from verbs like "Adds" or "Removes", and never from summary text. No label means no status badge. It does not mean GA. One exception: a collector may lift a whole status sentence into `label` when the vendor states status that way under the heading (Redis Cloud's `label_text`: "X is now generally available", "is currently in public preview"). Loose words in the summary still never count.
 
 ## Classification rules
 
@@ -93,6 +93,7 @@ python -m signals collect --input databricks-rss=tests/fixtures/databricks-feed.
 | Memorystore for Valkey | `rss` (Atom) | `docs.cloud.google.com/feeds/memorystorevalkey-release-notes.xml`, same format as AlloyDB. |
 | Azure Database for PostgreSQL | `learn-page` | The Learn release notes page, read as markdown through Learn's public MCP endpoint (`learn.microsoft.com/api/mcp`, fetch tool only, fixed URL). The source repo is private. Each run fetches twice and fails the source if the copies differ. Status comes from the group bullet ("General availability", "Preview") or an inline prefix. Dates are month only. |
 | Snowflake | `snowflake-release-notes` | `docs.snowflake.com/en/release-notes/all-release-notes`. No RSS feed, and the `.md` copy is empty. The page embeds its entries as JSON in `__NEXT_DATA__`. Server releases are split into one row per feature. Keywords and change type become tags. |
+| Redis Cloud | `hugo-changelog` | Monthly changelog pages under `redis.io/docs/latest/operate/rc/changelog/`. No feed and no markdown copy, so the Hugo sources are read from the public `redis/docs` repo (`content/operate/rc/changelog/`, older months in `2023/` and `2024/`), listed through the GitHub contents API. Each `###` heading under a `##` category is one row; the category (New features, Enhancements, Deprecations, Security fixes) is a tag, and `kind_tags` maps Deprecations to deprecation. A category with no `###` headings gives one row per bullet. Dates are month only. Links point at redis.io. |
 
 ## Add a technology
 

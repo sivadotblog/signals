@@ -97,3 +97,18 @@ technologies:
         url: https://docs.cloud.google.com/feeds/memorystorevalkey-release-notes.xml
         split_heading: h3
         label_link: 'product-launch-stages'
+
+  - id: redis-cloud
+    name: Redis Cloud
+    # Monthly changelog pages on redis.io/docs/latest/operate/rc/changelog/. No feed and
+    # no markdown copy, so the Hugo sources are read from the public redis/docs repo.
+    # Older months sit in 2023/ and 2024/ sub-folders. Each change is a ### heading under
+    # a ## category (New features, Enhancements, Deprecations ...), which becomes a tag.
+    collectors:
+      - id: redis-cloud-changelog
+        type: hugo-changelog
+        repo: redis/docs
+        path: content/operate/rc/changelog
+        site_url: https://redis.io/docs/latest/
+        # Status is often a sentence under the heading, not in it. Only these fixed statements count.
+        label_text: '\b(?:is|are) (?:now |currently )?(generally available|in public preview|in private preview|in beta)\b|\bavailable (?:on [^.]*?)?as an? (public preview|private preview|beta)\b'

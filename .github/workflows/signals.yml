@@ -38,6 +38,8 @@ jobs:
 
       - name: Collect and classify
         run: python -m signals collect
+        env:
+          GITHUB_TOKEN: ${{ github.token }}  # GitHub API rate limit for the hugo-changelog collector
 
       - name: Render twice and check determinism
         run: |

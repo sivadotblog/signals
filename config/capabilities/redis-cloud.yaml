@@ -1,0 +1,89 @@
+# Redis Cloud capability taxonomy.
+#
+# One page per month. Each change is a ### heading under a ## category heading
+# (New features, Enhancements, Deprecations ...), which the collector stores as a tag.
+# Status comes from the heading: "(beta)", "preview", "public preview".
+# Type comes from the category heading (kind_tags), then title phrases.
+# First match wins: title regexes, then tags, then docs links (`paths` under /operate/rc/).
+# Capabilities are tried top to bottom, so Active-Active and Search sit above plans:
+# "Redis Search on Flex" is a Search change, not a plan change.
+# Check the "Other" page after changes:
+#   python -m signals report --tech redis-cloud
+
+technology: redis-cloud
+name: Redis Cloud
+default_capability: other
+
+doc_path_pattern: '^https://redis\.io/docs/latest/operate/rc/([^?#]*)'
+ignore_link_paths: ['changelog']
+
+status_rules:
+  - {value: ga, match: '\bgeneral availability\b|\bgenerally available\b|\(ga\)'}
+  - {value: beta, match: '\(beta\)|\bin beta\b'}
+  - {value: private-preview, match: '\bprivate preview\b'}
+  - {value: public-preview, match: '^(?!end of\b).*(?:\bpublic preview\b|\bpreview\b)'}  # not "End of X preview"
+
+kind_tags:
+  Deprecations: deprecation
+
+kind_rules:
+  - {value: retirement, match: '^end of\b|\b(?:is|are|has been) (?:now )?retired\b'}
+  - {value: deprecation, match: '\bdeprecat|\bend of (?:life|support)\b|\bno longer supported\b'}
+  - {value: coming-soon, match: '\bwill soon\b|\bcoming soon\b'}
+
+capabilities:
+  - id: versions
+    name: Redis versions and upgrades
+    description: New Redis versions on Cloud, opt-in, upgrades and breaking changes.
+    title: ['\bredis [678]\.\d\b', '\bupgrade', '\bversion\b', '\bopt-in\b', '\bresp\b', '\bbreaking\b', '\bbehavior changes\b', '\bknown limitations\b']
+    paths: ['databases/version-management', 'changelog/version-release-notes']
+
+
+  - id: active-active
+    name: Active-Active and high availability
+    title: ['\bactive-active\b', '\bactive-passive\b', '\bavailability zones?\b']
+    paths: ['databases/active-active', 'databases/configuration/high-availability', 'databases/migrate-databases']
+
+
+  - id: search-ai
+    name: Search, AI and data features
+    description: Redis Search, query engine, JSON, LangCache and other data features.
+    title: ['\bsearch\b', '\bquery\b', '\bjson\b', '\blangcache\b', '\btriggers and functions\b', '\bvector\b', '\biris\b', '\bredisgraph\b', '\bredis stack\b']
+    paths: ['langcache', 'databases/configuration/advanced-capabilities']
+
+
+  - id: plans-billing
+    name: Plans, billing and marketplaces
+    description: Essentials, Pro, Flex and BYOC plans, billing units, cost reports, payments and cloud marketplaces.
+    title: ['\bbilling\b', '\bcost\b', '\bcredit card\b', '\bpayment', '\bfixed plans?\b', '\bfree database\b', '\bmarketplace\b',
+            '\bbring your own cloud\b', '\bbyoc\b', '\bflex\b', '\bessentials subscriptions?\b', '\bheroku\b', '\b(?:nano|pico) billing\b']
+    paths: ['billing-and-payments', 'cloud-integrations', 'subscriptions', 'logs-reports']
+
+
+  - id: security
+    name: Security and access
+    description: Authentication, SSO, roles, ACLs, TLS and private connectivity.
+    title: ['\bsaml\b', '\bsso\b', '\bacls?\b', '\broles?\b', '\btls\b', '\bpasswordless\b', '\bprivatelink\b', '\btransit gateway\b',
+            '\bpublic endpoints?\b', '\bcidr\b', '\bsecurity\b', '\baccess\b', '\bcve-\d', '\busers?\b']
+    tags: ['Security fixes']
+    paths: ['security', 'accounts']
+
+
+  - id: data-integration
+    name: Data Integration
+    title: ['\bdata integration\b', '\brdi\b']
+    paths: ['rdi']
+
+
+  - id: databases
+    name: Databases, scaling and endpoints
+    description: Creating, sizing, scaling and connecting to databases.
+    title: ['\bendpoints?\b', '\bscal(?:e|ing)\b', '\bhashing policy\b', '\bdataset size\b', '\bbackups?\b', '\bdatabase tags\b', '\bmaintenance\b', '\badvanced capabilities\b']
+    paths: ['databases']
+
+
+  - id: tools-api
+    name: Console, API, Terraform and tools
+    description: The console, REST API, Terraform provider, Redis Insight, Radar and monitoring.
+    title: ['\bapi\b', '\bterraform\b', '\bredis insight\b', '\bradar\b', '\bconsole\b', '\b(?:new )?ui\b', '\bmetrics?\b', '\bexport\b', '\bcsv\b', '\blogs?\b']
+    paths: ['api', 'databases/monitor-performance', 'databases/view-edit-database']
