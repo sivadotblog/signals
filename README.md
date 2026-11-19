@@ -44,7 +44,7 @@ Each update is one JSON line.
 
 Status is the status the announcement gave on its date. It is not the current status. A feature that went from Beta to GA has two rows.
 
-Status and type are set only from words the vendor wrote as a label: "(Beta)", "is now generally available", "Public Preview:", "is retired", "end of life", "will soon". They are never inferred from verbs like "Adds" or "Removes", and never from summary text. No label means no status badge. It does not mean GA.
+Status and type are set only from words the vendor wrote as a label: "(Beta)", "is now generally available", "Public Preview:", "is retired", "end of life", "will soon". They are never inferred from verbs like "Adds" or "Removes", and never from summary text. No label means no status badge. It does not mean GA. One exception: a collector may lift a whole status sentence into `label` when the vendor states status that way under the heading (Redis Cloud's `label_text`: "X is now generally available", "is currently in public preview"). Loose words in the summary still never count.
 
 ## Classification rules
 

@@ -39,6 +39,10 @@ Params (from technologies.yaml):
   date_field      front matter field with the page's month, default linktitle
   subdir_include  regex on sub-folder names to read, default four-digit years
   release_level, item_level   category and item heading levels, default 2 and 3
+  label_text      regex over the item text. The first match becomes the Update's `label`
+                  (its first non-empty group, else the whole match). For vendors that state
+                  status in a fixed sentence under the heading, e.g. "X is now generally
+                  available". Keep it to whole status statements, never loose words.
 
 The folder is listed through the GitHub contents API (one call per folder). Set
 GITHUB_TOKEN to raise the API rate limit. Offline, `input_path` is a local copy of
@@ -103,7 +107,8 @@ def _get_json(url: str, retries: int = 3):
 class HugoChangelog:
     def __init__(self, technology: str, id: str, repo: str, path: str, site_url: str, ref: str = "main",
                  content_dir: str = "content", page_tag: str = "changelog", date_field: str = "linktitle",
-                 subdir_include: str = r"^\d{4}$", release_level: int = 2, item_level: int = 3):
+                 subdir_include: str = r"^\d{4}$", release_level: int = 2, item_level: int = 3,
+                 label_text: str | None = None):
         self.technology = technology
         self.id = id
         self.repo = repo
@@ -116,6 +121,7 @@ class HugoChangelog:
         self.subdir_rx = re.compile(subdir_include)
         self.release_level = release_level
         self.item_level = item_level
+        self.label_rx = re.compile(label_text, re.I) if label_text else None
         self.url = f"https://github.com/{repo}/tree/{ref}/{self.path}"
 
     # Sources
@@ -195,6 +201,10 @@ class HugoChangelog:
                 u = self.site_link(href, page_url)
                 if u.startswith("http") and u not in links:
                     links.append(u)
+            label = ""
+            m = self.label_rx.search(summary) if self.label_rx else None
+            if m:
+                label = next((g for g in m.groups() if g), m.group(0))
             anchor = hugo_anchor(title if is_heading else category)
             sid = f"{repo_path}::{slug(category)}::{slug(title)}"
             n = 2
@@ -205,6 +215,6 @@ class HugoChangelog:
             out.append(Update(
                 technology=self.technology, source=self.id, source_id=sid, date=date,
                 date_precision=precision, title=title, url=f"{page_url}#{anchor}",
-                summary="" if summary == title else summary, links=links, tags=[category],
+                summary="" if summary == title else summary, links=links, tags=[category], label=label,
             ))
         return out

@@ -110,3 +110,5 @@ technologies:
         repo: redis/docs
         path: content/operate/rc/changelog
         site_url: https://redis.io/docs/latest/
+        # Status is often a sentence under the heading, not in it. Only these fixed statements count.
+        label_text: '\b(?:is|are) (?:now |currently )?(generally available|in public preview|in private preview|in beta)\b|\bavailable (?:on [^.]*?)?as an? (public preview|private preview|beta)\b'

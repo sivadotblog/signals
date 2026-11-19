@@ -364,6 +364,7 @@ def test_all_taxonomies_load_and_match_config():
 
 
 RC_FIXTURE = ROOT / "tests" / "fixtures" / "redis-cloud-changelog"
+N_RC = 28
 
 
 def collect_redis_cloud():
@@ -375,7 +376,7 @@ def collect_redis_cloud():
 def test_redis_cloud_month_pages():
     ups = collect_redis_cloud()
     t = by_title(ups)
-    assert len(ups) == len({u.id for u in ups}) == 20  # index pages and version-release-notes/ skipped
+    assert len(ups) == len({u.id for u in ups}) == N_RC  # index pages and version-release-notes/ skipped
     s = t["Redis Search on Flex (beta)"]
     assert (s.date, s.date_precision, s.status, s.capability, s.tags) == (
         "2026-09-01", "month", "beta", "search-ai", ["New features"])
@@ -409,3 +410,12 @@ def test_hugo_link_and_anchor_helpers():
     assert col.site_link("/content/a/b/_index.md#x", page) == "https://ex.com/docs/latest/a/b/#x"
     assert col.site_link("/content/commands?group=list", page) == "https://ex.com/docs/latest/commands/?group=list"
     assert col.site_link("#local", page) == page + "#local"
+
+
+def test_redis_cloud_status_from_fixed_sentences():
+    t = by_title(collect_redis_cloud())
+    assert (t["Redis 8.6 on Redis Cloud Pro"].label, t["Redis 8.6 on Redis Cloud Pro"].status) == ("generally available", "ga")
+    assert t["Redis Iris"].status == "public-preview"  # "available on Redis Cloud as a public preview"
+    assert t["Redirect dynamic endpoints"].status == "public-preview"  # "is currently in public preview"
+    assert t["Dynamic endpoints"].status == "" and t["Dynamic endpoints"].kind == "release"  # "may be deprecated" is no label
+    assert t["Metrics resolution updates"].status == ""
