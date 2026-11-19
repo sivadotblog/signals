@@ -1,0 +1,39 @@
+---
+Title: Redis Cloud changelog (March 2025)
+alwaysopen: false
+categories:
+- docs
+- operate
+- rc
+description: New features, enhancements, and other changes added to Redis Cloud during
+  March 2025.
+highlights: Redis Insight on Redis Cloud, Redis Hashing policy
+linktitle: March 2025
+tags:
+- changelog
+weight: 78
+---
+
+## New features
+
+### Redis Insight on Redis Cloud
+
+Users with select Redis Cloud Essentials databases can now open a browser-based version of [Redis Insight](/content/operate/rc/databases/connect/insight-cloud.md) directly from Redis Cloud. See [Connect to your database](/content/operate/rc/databases/connect/_index.md#ri-browser) to learn how to open Redis Insight from Redis Cloud.
+
+This browser-based version of Redis Insight has a subset of the features of Redis Insight on desktop. For more information, see [Open with Redis Insight on Redis Cloud](/content/operate/rc/databases/connect/insight-cloud.md).
+
+### Redis hashing policy
+
+Accounts created after March 31, 2025, can select the new [Redis hashing policy](/content/operate/rc/databases/configuration/clustering.md#redis-hashing-policy) for their databases when creating a new database. 
+
+The Redis hashing policy is identical to the [hashing policy used by Redis Community Edition](/content/operate/oss_and_stack/reference/cluster-spec.md#hash-tags). This policy is recommended for most users. Select it if any of the following conditions apply:
+- This is your first Redis Cloud account, and you are starting fresh.
+- You are migrating data from Redis Community Edition or other Redis-managed platforms.
+- Your application does not use hashtags in database key names.
+- Your application uses binary data as key names.
+
+See [Clustering](/content/operate/rc/databases/configuration/clustering.md#manage-the-hashing-policy) for more information.
+
+## Deprecations
+
+- The [Custom hashing policy](/content/operate/rc/databases/configuration/clustering.md#custom-hashing-policy) is no longer available for accounts created after March 31, 2025. For all other accounts, this policy is not recommended and will be deprecated in the future. Only select a custom hashing policy if you are already using a custom hashing policy with your existing Redis Cloud databases.

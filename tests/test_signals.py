@@ -108,6 +108,7 @@ def run_pipeline(tmp: Path, out: Path):
             "--input", f"azure-managed-redis-whats-new={ROOT / 'tests' / 'fixtures' / 'azure-managed-redis-whats-new.md'}",
             "--input", f"alloydb-release-notes={ROOT / 'tests' / 'fixtures' / 'alloydb-release-notes.xml'}",
             "--input", f"azure-postgresql-release-notes={ROOT / 'tests' / 'fixtures' / 'azure-postgresql-release-notes.md'}",
+            "--input", f"redis-cloud-changelog={ROOT / 'tests' / 'fixtures' / 'redis-cloud-changelog'}",
             "--out", str(out)]
     assert main(args) == 0
     return data
@@ -360,3 +361,51 @@ def test_all_taxonomies_load_and_match_config():
     for tid in ids:
         tax = load_taxonomy(ROOT / "config" / "capabilities" / f"{tid}.yaml")
         assert tax.technology == tid
+
+
+RC_FIXTURE = ROOT / "tests" / "fixtures" / "redis-cloud-changelog"
+
+
+def collect_redis_cloud():
+    spec = next(c for t in load_config(ROOT) if t["id"] == "redis-cloud" for c in t["collectors"])
+    tax = load_taxonomy(ROOT / "config" / "capabilities" / "redis-cloud.yaml")
+    return [classify(tax, u) for u in build("redis-cloud", spec).collect(str(RC_FIXTURE))]
+
+
+def test_redis_cloud_month_pages():
+    ups = collect_redis_cloud()
+    t = by_title(ups)
+    assert len(ups) == len({u.id for u in ups}) == 20  # index pages and version-release-notes/ skipped
+    s = t["Redis Search on Flex (beta)"]
+    assert (s.date, s.date_precision, s.status, s.capability, s.tags) == (
+        "2026-09-01", "month", "beta", "search-ai", ["New features"])
+    assert s.url == "https://redis.io/docs/latest/operate/rc/changelog/september-2026/#redis-search-on-flex-beta"
+    assert s.links[0] == "https://redis.io/docs/latest/develop/ai/search-and-query/"  # Hugo source link to site URL
+    assert s.source_id == "content/operate/rc/changelog/september-2026.md::new-features::redis-search-on-flex-beta"
+    pl = t["Connect to AWS PrivateLink from on-premises"]
+    assert (pl.capability, pl.tags, pl.status) == ("security", ["Enhancements"], "")
+    dep = next(u for u in ups if "Deprecations" in u.tags)
+    assert dep.kind == "deprecation"  # from the category heading
+
+
+def test_redis_cloud_older_layouts():
+    t = by_title(collect_redis_cloud())
+    acl = t["Pub/sub ACLs"]  # 2023 sub-folder, a category with bullets instead of item headings
+    assert acl.date == "2023-01-01" and acl.capability == "security"
+    assert acl.url == "https://redis.io/docs/latest/operate/rc/changelog/2023/january-2023/#new-features-and-enhancements"
+    r7 = t["Redis 7.0 preview"]
+    assert r7.status == "public-preview" and r7.capability == "versions"
+    assert r7.url.endswith("/2023/march-2023/#redis-70-preview")
+    assert "https://redis.io/docs/latest/commands/?group=cluster" in r7.links  # #### sub-headings stay in the item
+    assert not any(u.links and "/images/" in u.links[0] for u in t.values())
+
+
+def test_hugo_link_and_anchor_helpers():
+    from signals.collectors.hugo_changelog import HugoChangelog, hugo_anchor
+    assert hugo_anchor("Cloud API - Fixed plans support") == "cloud-api---fixed-plans-support"
+    col = HugoChangelog("x", "x", repo="o/r", path="content/a/changelog", site_url="https://ex.com/docs/latest")
+    page = col.page_url("content/a/changelog/2023/may-2023.md")
+    assert page == "https://ex.com/docs/latest/a/changelog/2023/may-2023/"
+    assert col.site_link("/content/a/b/_index.md#x", page) == "https://ex.com/docs/latest/a/b/#x"
+    assert col.site_link("/content/commands?group=list", page) == "https://ex.com/docs/latest/commands/?group=list"
+    assert col.site_link("#local", page) == page + "#local"
